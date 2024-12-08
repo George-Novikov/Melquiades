@@ -1,89 +1,40 @@
 package com.georgen.melquiades.model;
 
-import com.georgen.melquiades.api.Operation;
-import com.georgen.melquiades.util.OperationExtractor;
+import java.time.LocalDateTime;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
+public interface Profiler {
 
-public class Profiler extends Throwable {
-    public static final int DEFAULT_STACK_DEPTH = 0;
+    String DEFAULT_GROUP = "DEFAULT_PROFILER_GROUP";
 
-    private final String uuid;
-    private final StackTraceElement[] stackTrace;
-    private long start;
-    private long finish;
-    private long duration;
-    private String className;
-    private String methodName;
+    String getUuid();
 
-    public Profiler(){
-        this(DEFAULT_STACK_DEPTH);
-    }
+    LocalDateTime getStart();
 
-    protected Profiler(int stackDepth) {
-        this.start = System.currentTimeMillis();
-        this.uuid = UUID.randomUUID().toString();
-        this.stackTrace = super.getStackTrace();
-        StackTraceElement throwable = this.stackTrace[stackDepth];
-        this.className = throwable.getClassName();
-        this.methodName = throwable.getMethodName();
-    }
+    LocalDateTime getFinish();
 
-    public String getUuid() { return uuid; }
+    long getDuration();
 
-    @Override
-    public StackTraceElement[] getStackTrace() { return stackTrace; }
+    String getClassName();
 
-    public long getStart() { return start; }
+    void setClassName(String className);
 
-    public void setStart(long start) { this.start = start; }
+    String getMethodName();
 
-    public long getFinish() { return finish; }
+    void setMethodName(String methodName);
 
-    public void setFinish(long finish) { this.finish = finish; }
+    Profiler finish(Object... args);
 
-    public long getDuration() { return duration; }
+    Profiler error(Exception e);
 
-    public void setDuration(long duration) { this.duration = duration; }
+    static Profiler start(String ...args){
+        if (args == null || args.length == 0) {
+            return new StackProfiler();
+        }
 
-    public String getClassName() { return className; }
+        if (args.length == 1) {
+            return new SimpleProfiler(DEFAULT_GROUP, args[0]);
+        }
 
-    public void setClassName(String className) { this.className = className; }
-
-    public String getMethodName() { return methodName; }
-
-    public void setMethodName(String methodName) { this.methodName = methodName; }
-
-    public Profiler finish(){
-        this.finish = System.currentTimeMillis();
-        this.duration = this.finish - this.start;
-
-        List<Operation> operations = getOperations();
-
-
-        System.out.println(this);
-        return this;
-    }
-
-    public List<Operation> getOperations(){
-        return Arrays.stream(this.stackTrace)
-                .map(OperationExtractor::extract)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public String toString() {
-        return "AnalysisReport{" +
-                "start=" + start +
-                ", finish=" + finish +
-                ", duration=" + duration +
-                ", className='" + className + '\'' +
-                ", methodName='" + methodName + '\'' +
-                '}';
+        return new SimpleProfiler(args[0], args[1]);
     }
 }

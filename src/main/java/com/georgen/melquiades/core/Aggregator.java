@@ -1,6 +1,6 @@
 package com.georgen.melquiades.core;
 
-import com.georgen.melquiades.model.Profiler;
+import com.georgen.melquiades.model.StackProfiler;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,7 +11,7 @@ public class Aggregator {
     private static class Holder {
         private static long updateInterval = 1000;
         private static LocalDateTime currentSlice = LocalDateTime.now();
-        private static LocalDateTime nextSlice =
+        private static LocalDateTime nextSlice = null;
 
         private static final ConcurrentMap<String, ClassSlice> CLASS_SLICE = new ConcurrentHashMap<>();
         private static final ConcurrentMap<String, MethodSlice> METHOD_SLICE = new ConcurrentHashMap<>();
@@ -19,7 +19,7 @@ public class Aggregator {
         private static final ConcurrentMap<String, TimeSlice> TIME_SLICE = new ConcurrentHashMap<>();
     }
 
-    public static void register(Profiler profiler){
+    public static void register(StackProfiler stackProfiler){
 
     }
 

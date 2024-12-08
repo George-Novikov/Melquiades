@@ -8,7 +8,7 @@ public class FastProcess implements Runnable {
     @Operation(name = "fastRun", weight = 1)
     @Override
     public void run() {
-        Profiler profiler = new Profiler();
+        Profiler profiler = Profiler.start("FastProcess", "run()");
 
         int value = 0;
         for (int i = 0; i < 100000; i++){

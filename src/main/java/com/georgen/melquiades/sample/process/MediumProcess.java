@@ -9,7 +9,7 @@ public class MediumProcess implements Runnable {
     @Override
     public void run() {
         try {
-            Profiler profiler = new Profiler();
+            Profiler profiler = Profiler.start("MediumProcess.run()");
 
             int value = 0;
             for (int i = 0; i < 100000; i++){

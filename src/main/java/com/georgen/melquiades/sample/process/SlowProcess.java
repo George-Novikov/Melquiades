@@ -14,7 +14,7 @@ public class SlowProcess implements Runnable {
     @Operation(name = "slowRun", weight = 3)
     private void doRun(){
         try {
-            Profiler profiler = new Profiler();
+            Profiler profiler = Profiler.start();
 
             int value = 0;
             for (int i = 0; i < 100000; i++){
