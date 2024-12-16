@@ -1,6 +1,6 @@
 package com.georgen.melquiades.io;
 
-import com.georgen.melquiades.model.ErrorCallback;
+import com.georgen.melquiades.model.handlers.ErrorHandler;
 import com.georgen.melquiades.util.SystemHelper;
 
 import java.io.BufferedWriter;
@@ -11,25 +11,25 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-public class BufferedAppender implements AutoCloseable  {
+public class BufferAppender implements AutoCloseable  {
 
     private final BufferedWriter writer;
     private final Path path;
-    private ErrorCallback errorCallback;
+    private ErrorHandler errorHandler;
 
-    public BufferedAppender(String path) throws IOException {
+    public BufferAppender(String path) throws IOException {
         this(Paths.get(path));
     }
 
-    public BufferedAppender(Path path) throws IOException {
+    public BufferAppender(Path path) throws IOException {
         this(path, null);
     }
 
-    public BufferedAppender(String path, ErrorCallback errorCallback) throws IOException {
-        this(Paths.get(path), errorCallback);
+    public BufferAppender(String path, ErrorHandler errorHandler) throws IOException {
+        this(Paths.get(path), errorHandler);
     }
 
-    public BufferedAppender(Path path, ErrorCallback errorCallback) throws IOException {
+    public BufferAppender(Path path, ErrorHandler errorHandler) throws IOException {
         if (!Files.exists(path)){
             Path parent = path.getParent();
             if (parent != null) Files.createDirectories(path.getParent());
@@ -38,7 +38,7 @@ public class BufferedAppender implements AutoCloseable  {
 
         this.path = path;
         this.writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
-        this.errorCallback = errorCallback;
+        this.errorHandler = errorHandler;
 
         if (SystemHelper.isUnixSystem()){
             SystemHelper.setFilePermissions(path.toFile());
@@ -47,9 +47,9 @@ public class BufferedAppender implements AutoCloseable  {
 
     public Path getPath() { return path; }
 
-    public ErrorCallback getErrorCallback() { return errorCallback; }
+    public ErrorHandler getErrorHandler() { return errorHandler; }
 
-    public void setErrorCallback(ErrorCallback errorCallback) { this.errorCallback = errorCallback; }
+    public void setErrorHandler(ErrorHandler errorHandler) { this.errorHandler = errorHandler; }
 
     public void append(String message) {
         try {
@@ -57,7 +57,7 @@ public class BufferedAppender implements AutoCloseable  {
             writer.newLine();
             writer.flush();
         } catch (Exception e) {
-            if (errorCallback != null) errorCallback.doCallback(e);
+            if (errorHandler != null) errorHandler.handle(e);
         }
     }
 
@@ -69,7 +69,7 @@ public class BufferedAppender implements AutoCloseable  {
             writer.newLine();
             writer.flush();
         } catch (Exception e) {
-            if (errorCallback != null) errorCallback.doCallback(e);
+            if (errorHandler != null) errorHandler.handle(e);
         }
     }
 

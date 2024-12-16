@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SystemHelper {
+
     public static boolean isUnixSystem(){
         String osName = System.getProperty("os.name").toLowerCase();
         return osName.contains("nix") || osName.contains("nux");
@@ -21,5 +22,9 @@ public class SystemHelper {
                 .collect(Collectors.toSet());
 
         Files.setPosixFilePermissions(file.toPath(), permissions);
+    }
+
+    public static String toSystemPath(String... parts){
+        return String.join(File.separator, parts);
     }
 }

@@ -1,7 +1,8 @@
-package com.georgen.melquiades.model;
+package com.georgen.melquiades.model.trackers;
 
 import com.georgen.melquiades.api.Operation;
-import com.georgen.melquiades.core.ProfilerRegistry;
+import com.georgen.melquiades.core.Profiler;
+import com.georgen.melquiades.model.Phase;
 import com.georgen.melquiades.util.OperationExtractor;
 
 import java.time.LocalDateTime;
@@ -13,31 +14,33 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /** This class is much more expensive because of getStackTrace() method */
-public class StackProfiler extends Throwable implements Profiler {
+public class StackTracker extends Throwable implements Tracker {
     public static final int DEFAULT_STACK_DEPTH = 0;
 
-    private final String uuid;
+    private final UUID uuid;
     private final StackTraceElement[] stackTrace;
-    private LocalDateTime start;
+    private final LocalDateTime start;
     private LocalDateTime finish;
     private long duration;
-    private String className;
+    private Phase status;
+    private String groupName;
+    private String subGroupName;
     private String methodName;
 
-    public StackProfiler(){
+    public StackTracker(){
         this(DEFAULT_STACK_DEPTH);
     }
 
-    protected StackProfiler(int stackDepth) {
+    protected StackTracker(int stackDepth) {
         this.start = LocalDateTime.now();
-        this.uuid = UUID.randomUUID().toString();
+        this.uuid = UUID.randomUUID();
         this.stackTrace = super.getStackTrace();
         StackTraceElement throwable = this.stackTrace[stackDepth];
-        this.className = throwable.getClassName();
+        this.groupName = throwable.getClassName();
         this.methodName = throwable.getMethodName();
     }
 
-    public String getUuid() { return uuid; }
+    public UUID getUuid() { return uuid; }
 
     @Override
     public StackTraceElement[] getStackTrace() { return stackTrace; }
@@ -48,26 +51,33 @@ public class StackProfiler extends Throwable implements Profiler {
 
     public long getDuration() { return duration; }
 
-    public String getClassName() { return className; }
+    @Override
+    public Phase getPhase() { return status; }
 
-    public void setClassName(String className) { this.className = className; }
+    public String getCluster() { return groupName; }
 
-    public String getMethodName() { return methodName; }
+    public void setCluster(String cluster) { this.groupName = cluster; }
 
-    public void setMethodName(String methodName) { this.methodName = methodName; }
+    public String getGroup() { return subGroupName; }
 
-    public StackProfiler finish(Object... args){
+    public void setGroup(String group) { this.subGroupName = group; }
+
+    public String getProcess() { return methodName; }
+
+    public void setProcess(String process) { this.methodName = process; }
+
+    public Tracker finish(Object... args){
         this.finish = LocalDateTime.now();
         this.duration = ChronoUnit.MILLIS.between(this.start, this.finish);
 
         List<Operation> operations = getOperations();
-        ProfilerRegistry.process(this);
+        Profiler.getInstance().process(this);
 
         return this;
     }
 
     @Override
-    public Profiler error(Exception e) {
+    public Tracker error(Exception e) {
         return null;
     }
 
@@ -79,16 +89,7 @@ public class StackProfiler extends Throwable implements Profiler {
     }
 
     @Override
-    public String toString() {
-        return "StackProfiler{" +
-                "uuid='" + uuid + '\'' +
-                ", start=" + start +
-                ", finish=" + finish +
-                ", duration=" + duration +
-                ", className='" + className + '\'' +
-                ", methodName='" + methodName + '\'' +
-                '}';
-    }
+    public String toString() { return this.print(); }
 
-    public static StackProfiler start(){ return new StackProfiler(); }
+    public static StackTracker start(){ return new StackTracker(); }
 }

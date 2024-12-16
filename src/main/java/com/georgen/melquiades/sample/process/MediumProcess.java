@@ -1,7 +1,7 @@
 package com.georgen.melquiades.sample.process;
 
 import com.georgen.melquiades.api.Operation;
-import com.georgen.melquiades.model.Profiler;
+import com.georgen.melquiades.model.trackers.Tracker;
 
 public class MediumProcess implements Runnable {
 
@@ -9,7 +9,7 @@ public class MediumProcess implements Runnable {
     @Override
     public void run() {
         try {
-            Profiler profiler = Profiler.start("MediumProcess.run()");
+            Tracker tracker = Tracker.start("MediumProcess.run()");
 
             int value = 0;
             for (int i = 0; i < 100000; i++){
@@ -18,7 +18,7 @@ public class MediumProcess implements Runnable {
                 if (value == 0) value = -1000;
             }
             Thread.sleep(500);
-            profiler.finish();
+            tracker.finish();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

@@ -1,7 +1,7 @@
 package com.georgen.melquiades.sample.process;
 
 import com.georgen.melquiades.api.Operation;
-import com.georgen.melquiades.model.Profiler;
+import com.georgen.melquiades.model.trackers.Tracker;
 
 public class SlowProcess implements Runnable {
 
@@ -14,7 +14,7 @@ public class SlowProcess implements Runnable {
     @Operation(name = "slowRun", weight = 3)
     private void doRun(){
         try {
-            Profiler profiler = Profiler.start();
+            Tracker tracker = Tracker.start();
 
             int value = 0;
             for (int i = 0; i < 100000; i++){
@@ -24,7 +24,7 @@ public class SlowProcess implements Runnable {
             }
             Thread.sleep(2000);
 
-            profiler.finish();
+            tracker.finish();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
