@@ -1,7 +1,8 @@
-package com.georgen.melquiades.core;
+package com.georgen.melquiades.model;
 
 
-import com.georgen.melquiades.model.data.ClusterData;
+import com.georgen.melquiades.model.data.DataCluster;
+import com.georgen.melquiades.model.trackers.Tracker;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentMap;
@@ -10,7 +11,7 @@ public class ProfilerReport {
     private LocalDateTime start;
     private LocalDateTime finish;
     private Double duration;
-    private ConcurrentMap<String, ClusterData> data;
+    private ConcurrentMap<String, DataCluster> data;
 
     public LocalDateTime getStart() { return start; }
 
@@ -24,7 +25,12 @@ public class ProfilerReport {
 
     public void setDuration(Double duration) { this.duration = duration; }
 
-    public ConcurrentMap<String, ClusterData> getData() { return data; }
+    public ConcurrentMap<String, DataCluster> getData() { return data; }
 
-    public void setData(ConcurrentMap<String, ClusterData> data) { this.data = data; }
+    public void setData(ConcurrentMap<String, DataCluster> data) { this.data = data; }
+
+    public void register(Tracker tracker){
+        String cluster = tracker.getCluster();
+
+    }
 }

@@ -1,9 +1,5 @@
 package com.georgen.melquiades;
 
-import com.alibaba.fastjson2.JSON;
-import com.georgen.melquiades.model.data.ClusterData;
-import com.georgen.melquiades.core.Hits;
-import com.georgen.melquiades.core.Stat;
 import com.georgen.melquiades.io.BufferReader;
 import com.georgen.melquiades.util.Statistics;
 
@@ -12,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 
 public class Application {
@@ -59,7 +56,6 @@ public class Application {
                     1.0, 0.45, 0.657, 0.89, 0.34, 0.23, 0.77, 0.89, 0.9, 0.5
             );
 
-
             System.out.println(
                     "Numbers 50 percentile is " +
                             Statistics.percentile(numbers, 50)
@@ -75,18 +71,17 @@ public class Application {
                     Statistics.percentile(numbers, 95)
             );
 
+            System.out.println(
+                    "Numbers mode is " +
+                    Statistics.mode(numbers)
+            );
 
-            ClusterData clusterData = new ClusterData();
-            clusterData.setName("DataGroup name");
-            clusterData.setHits(new Hits());
-            clusterData.setStat(new Stat());
-            String jsonData = JSON.toJSONString(clusterData);
-            System.out.println(jsonData);
+            int threads = 3;
+            int schedulerThreads = threads % 2 == 0 ? threads / 2 : threads / 2 + 1;
+            int executorThreads = threads / 2;
 
-            ClusterData newGroup = JSON.parseObject(jsonData, ClusterData.class);
-            System.out.println(newGroup.getName());
-
-
+            System.out.println("schedulerThreads: " + schedulerThreads);
+            System.out.println("executorThreads: " + executorThreads);
 
         } catch (Exception e){
             e.printStackTrace();

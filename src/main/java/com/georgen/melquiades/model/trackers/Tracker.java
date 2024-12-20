@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public interface Tracker {
 
-    String DEFAULT_CLUSTER = "DEFAULT_CLUSTER";
-    String DEFAULT_GROUP = "DEFAULT_GROUP";
+    String DEFAULT_CLUSTER = "default_cluster";
+    String DEFAULT_GROUP = "default_group";
     String KEY_SEPARATOR = "=";
     String VALUE_SEPARATOR = " ";
 
@@ -35,9 +35,21 @@ public interface Tracker {
 
     void setProcess(String process);
 
+    default boolean hasCluster(){ return this.getCluster() != null && !this.getCluster().isEmpty(); }
+
+    default boolean hasGroup(){ return this.getGroup() != null && !this.getGroup().isEmpty(); }
+
+    default boolean hasProcess(){ return this.getProcess() != null && !this.getProcess().isEmpty(); }
+
     Tracker finish(Object... args);
 
     Tracker error(Exception e);
+
+    default boolean isValid(){
+        return this.getCluster() != null && !this.getCluster().isEmpty()
+                && this.getGroup() != null && !this.getGroup().isEmpty()
+                && this.getProcess() != null && !this.getProcess().isEmpty();
+    }
 
     default String print(){
         return new StringBuilder()
@@ -50,23 +62,24 @@ public interface Tracker {
                 .toString();
     }
 
-    static Tracker start(String ...args){
-        Tracker tracker = null;
-
-        if (args == null || args.length == 0) {
-            tracker = new StackTracker();
-        }
-
-        if (args.length == 1) {
-            tracker = new NamedTracker(DEFAULT_GROUP, args[0]);
-        }
-
-        if (tracker == null) {
-            tracker = new NamedTracker(args[0], args[1]);
-        }
-
+    static Tracker start(){
+        Tracker tracker = new StackTracker();
         Profiler.getInstance().process(tracker);
+        return tracker;
+    }
 
+    static Tracker start(String process){
+        return start(DEFAULT_CLUSTER, DEFAULT_GROUP, process);
+    }
+
+    static Tracker start(String group, String process){
+        return start(DEFAULT_CLUSTER, group, process);
+    }
+
+    static Tracker start(String cluster, String group, String process) {
+        boolean isEnabled = Profiler.isEnabled();
+        Tracker tracker = isEnabled ? new NamedTracker(cluster, group, process) : new IdleTracker(cluster, group, process);
+        if (isEnabled) Profiler.getInstance().process(tracker);
         return tracker;
     }
 }

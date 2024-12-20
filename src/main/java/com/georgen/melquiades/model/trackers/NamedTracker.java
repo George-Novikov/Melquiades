@@ -13,7 +13,7 @@ public class NamedTracker implements Tracker {
     private final LocalDateTime start;
     private LocalDateTime finish;
     private long duration = -1;
-    private Phase status = Phase.RUNNING;
+    private Phase phase = Phase.RUNNING;
     private String cluster;
     private String group;
     private String process;
@@ -24,6 +24,10 @@ public class NamedTracker implements Tracker {
 
     public NamedTracker(String group, String process) {
         this(Tracker.DEFAULT_CLUSTER, group, process);
+    }
+
+    public NamedTracker(Class javaClass, String process){
+        this(Tracker.DEFAULT_CLUSTER, javaClass.getSimpleName(), process);
     }
 
     public NamedTracker(String cluster, String group, String process) {
@@ -42,7 +46,7 @@ public class NamedTracker implements Tracker {
 
     public long getDuration() { return duration; }
 
-    public Phase getPhase() { return status; }
+    public Phase getPhase() { return phase; }
 
     public String getCluster() { return cluster; }
 
@@ -56,9 +60,19 @@ public class NamedTracker implements Tracker {
 
     public void setProcess(String process) { this.process = process; }
 
+    public boolean hasCluster(){ return this.cluster != null && !this.cluster.isEmpty(); }
+
+    public boolean hasGroup(){ return this.group != null && !this.group.isEmpty(); }
+
+    public boolean hasProcess(){ return this.process != null && !this.process.isEmpty(); }
+
+    public boolean hasDefaultCluster(){ return Tracker.DEFAULT_CLUSTER.equals(this.cluster); }
+
+    public boolean hasDefaultGroup(){ return Tracker.DEFAULT_GROUP.equals(this.cluster); }
+
     public Tracker finish(Object... args){
         this.finish = LocalDateTime.now();
-        this.status = Phase.FINISHED;
+        this.phase = Phase.FINISHED;
         this.duration = ChronoUnit.MILLIS.between(this.start, this.finish);
         Profiler.getInstance().process(this);
         return this;
@@ -66,7 +80,9 @@ public class NamedTracker implements Tracker {
 
     @Override
     public Tracker error(Exception e) {
-        return null;
+        this.phase = Phase.ERROR;
+        Profiler.getInstance().process(this);
+        return this;
     }
 
     @Override

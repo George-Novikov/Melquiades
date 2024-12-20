@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+/**
+ * This type of tracker does not interact with
+ * */
 public class IdleTracker implements Tracker {
 
     private final UUID uuid;
@@ -23,6 +26,10 @@ public class IdleTracker implements Tracker {
 
     public IdleTracker(String group, String process) {
         this(Tracker.DEFAULT_CLUSTER, group, process);
+    }
+
+    public IdleTracker(Class javaClass, String process){
+        this(Tracker.DEFAULT_CLUSTER, javaClass.getSimpleName(), process);
     }
 
     public IdleTracker(String cluster, String group, String process) {
