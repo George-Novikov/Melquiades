@@ -12,9 +12,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.nio.ByteBuffer.wrap;
-
 public class BufferReader implements AutoCloseable {
+
     public static int DEFAULT_BUFFER_SIZE = 1024;
 
     private final byte[] bytes;
@@ -36,7 +35,7 @@ public class BufferReader implements AutoCloseable {
 
     public BufferReader(Path path, int bufferSize) throws IOException {
         this.bytes = new byte[bufferSize];
-        this.buffer = wrap(bytes);
+        this.buffer = ByteBuffer.wrap(bytes);
         this.channel = Files.newByteChannel(path, StandardOpenOption.READ);
     }
 
@@ -132,7 +131,11 @@ public class BufferReader implements AutoCloseable {
         return lines;
     }
 
-    public long findFirstPosition(long position, String condition) throws IOException {
+    public long firstPosition(String condition) throws IOException {
+        return firstPosition(0, condition);
+    }
+
+    public long firstPosition(long position, String condition) throws IOException {
         if (condition == null || condition.isEmpty()) return -1;
 
         byte[] pattern = condition.getBytes(charset);
@@ -166,14 +169,17 @@ public class BufferReader implements AutoCloseable {
         }
     }
 
-    public long findLastPosition(long position, String condition) throws IOException {
+    public long lastPosition(String condition) throws IOException {
+        return lastPosition(0, condition);
+    }
+
+    public long lastPosition(long position, String condition) throws IOException {
         if (condition == null || condition.isEmpty()) return -1;
 
         byte[] pattern = condition.getBytes(charset);
         channel.position(position);
         if (!channel.isOpen()) return -1;
 
-        long lastMatchPosition = -1;
         long lastLineEndPosition = -1;  // Add this to track the end of the last matching line
         long currentPosition = position;
 
@@ -187,7 +193,6 @@ public class BufferReader implements AutoCloseable {
             for (int i = 0; i < buffer.limit(); i++) {
                 if (bytes[i] == '\n') {
                     if (matchPattern(bytes, lineStart, i, pattern)) {
-                        lastMatchPosition = currentPosition + lineStart;
                         lastLineEndPosition = currentPosition + i + 1;
                     }
                     lineStart = i + 1;
@@ -196,7 +201,6 @@ public class BufferReader implements AutoCloseable {
 
             // Check last line if it doesn't end with newline
             if (lineStart < buffer.limit() && matchPattern(bytes, lineStart, buffer.limit(), pattern)) {
-                lastMatchPosition = currentPosition + lineStart;
                 lastLineEndPosition = currentPosition + buffer.limit();
             }
 
@@ -271,8 +275,6 @@ public class BufferReader implements AutoCloseable {
         if (!channel.isOpen()) return null;
 
         // Store the byte range and buffer content of the last match
-        int matchStart = -1;
-        int matchEnd = -1;
         byte[] matchBuffer = null;
         long matchPosition = -1;
 
@@ -293,9 +295,6 @@ public class BufferReader implements AutoCloseable {
                     foundLine = true;
                     // Check if current line matches pattern
                     if (matchPattern(bytes, lineStart, i, pattern)) {
-                        // Save match information without creating String
-                        matchStart = lineStart;
-                        matchEnd = i;
                         matchBuffer = new byte[i - lineStart];
                         System.arraycopy(bytes, lineStart, matchBuffer, 0, i - lineStart);
                         matchPosition = currentPosition + i + 1;
@@ -332,7 +331,6 @@ public class BufferReader implements AutoCloseable {
             }
         }
 
-        // Only create one String object at the end if we found a match
         if (matchBuffer != null) {
             channel.position(matchPosition);
             return new String(matchBuffer, charset);
@@ -341,7 +339,6 @@ public class BufferReader implements AutoCloseable {
     }
 
     private boolean matchPattern(byte[] data, int start, int end, byte[] pattern) {
-        // Simple byte array search
         outer:
         for (int i = start; i <= end - pattern.length; i++) {
             for (int j = 0; j < pattern.length; j++) {

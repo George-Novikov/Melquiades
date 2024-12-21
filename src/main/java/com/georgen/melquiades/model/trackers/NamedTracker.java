@@ -44,9 +44,15 @@ public class NamedTracker implements Tracker {
 
     public LocalDateTime getFinish() { return finish; }
 
+    public void setFinish(LocalDateTime finish) { this.finish = finish; }
+
     public long getDuration() { return duration; }
 
+    public void setDuration(long duration) { this.duration = duration; }
+
     public Phase getPhase() { return phase; }
+
+    public void setPhase(Phase phase) { this.phase = phase; }
 
     public String getCluster() { return cluster; }
 
@@ -69,21 +75,6 @@ public class NamedTracker implements Tracker {
     public boolean hasDefaultCluster(){ return Tracker.DEFAULT_CLUSTER.equals(this.cluster); }
 
     public boolean hasDefaultGroup(){ return Tracker.DEFAULT_GROUP.equals(this.cluster); }
-
-    public Tracker finish(Object... args){
-        this.finish = LocalDateTime.now();
-        this.phase = Phase.FINISHED;
-        this.duration = ChronoUnit.MILLIS.between(this.start, this.finish);
-        Profiler.getInstance().process(this);
-        return this;
-    }
-
-    @Override
-    public Tracker error(Exception e) {
-        this.phase = Phase.ERROR;
-        Profiler.getInstance().process(this);
-        return this;
-    }
 
     @Override
     public String toString() { return this.print(); }

@@ -1,5 +1,6 @@
 package com.georgen.melquiades.model.trackers;
 
+import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Phase;
 
 import java.time.LocalDateTime;
@@ -46,9 +47,15 @@ public class IdleTracker implements Tracker {
 
     public LocalDateTime getFinish() { return finish; }
 
+    public void setFinish(LocalDateTime finish) { this.finish = finish; }
+
     public long getDuration() { return duration; }
 
+    public void setDuration(long duration) { this.duration = duration; }
+
     public Phase getPhase() { return phase; }
+
+    public void setPhase(Phase phase) { this.phase = phase; }
 
     public String getCluster() { return cluster; }
 
@@ -62,6 +69,8 @@ public class IdleTracker implements Tracker {
 
     public void setProcess(String process) { this.process = process; }
 
+    /** Please note that there's no Profiler call — thus it won't be automatically processed */
+    @Override
     public Tracker finish(Object... args){
         this.finish = LocalDateTime.now();
         this.phase = Phase.FINISHED;
@@ -69,9 +78,11 @@ public class IdleTracker implements Tracker {
         return this;
     }
 
+    /** Please note that there's no Profiler call — thus it won't be automatically processed */
     @Override
     public Tracker error(Exception e) {
-        return null;
+        this.phase = Phase.ERROR;
+        return this;
     }
 
     @Override

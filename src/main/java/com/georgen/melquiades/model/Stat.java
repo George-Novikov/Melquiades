@@ -4,13 +4,14 @@ import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.settings.Metrics;
 import com.georgen.melquiades.util.Statistics;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Stat extends ConcurrentHashMap<String, Double> {
 
-    public static Stat of(List<Double> dataset){
+    public static Stat of(Collection<Double> dataset){
         Metrics metrics = Profiler.metrics();
 
         Stat stat = new Stat();

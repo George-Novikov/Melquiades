@@ -68,4 +68,35 @@ public class Hits {
         if (hasRun(uuid)) minusRun(uuid);
         this.errors++;
     }
+
+    public void register(Tracker tracker){
+        if (!tracker.hasPhase()) return;
+
+        switch (tracker.getPhase()){
+            case RUNNING:{
+                plusRun(tracker.getUuid());
+                return;
+            }
+            case FINISHED: {
+                plusSuccess(tracker.getUuid());
+                return;
+            }
+            case ERROR: {
+                plusError(tracker.getUuid());
+            }
+        }
+    }
+
+    public void calculate(){
+        this.total = this.running + this.success + this.errors;
+    }
+
+    public static Hits ofBatch(List<Hits> hitsList){
+        Hits hits = new Hits();
+        hits.setTotal(hitsList.stream().mapToInt(Hits::getTotal).sum());
+        hits.setRunning(hitsList.stream().mapToInt(Hits::getRunning).sum());
+        hits.setSuccess(hitsList.stream().mapToInt(Hits::getSuccess).sum());
+        hits.setErrors(hitsList.stream().mapToInt(Hits::getErrors).sum());
+        return hits;
+    }
 }

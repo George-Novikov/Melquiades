@@ -1,6 +1,10 @@
 package com.georgen.melquiades.model.settings;
 
+import java.io.File;
+
 public class ProfilerSettings {
+
+    public static int INTERVAL_THRESHOLD = 200;
 
     private Boolean isEnabled;
     private Integer threads;
@@ -52,8 +56,32 @@ public class ProfilerSettings {
 
     public void setBlacklist(Blacklist blacklist) { this.blacklist = blacklist; }
 
+    public boolean isBlacklisted(String name, DataType type){
+        return getBlacklist().isBlacklisted(name, type);
+    }
+
+    public void enable(){ this.isEnabled = Boolean.TRUE; }
+
+    public void disable(){ this.isEnabled = Boolean.FALSE; }
+
     public void validate(){
+        if (this.getHomePath() == null || this.getHomePath().isEmpty()) {
+            throw new IllegalArgumentException("Profiler home path cannot be null or empty!");
+        }
+
+        if (this.getFileName() == null || this.getFileName().isEmpty()) {
+            throw new IllegalArgumentException("Profiler file name cannot be null or empty!");
+        }
+
+        if (this.getInterval() == null || this.getInterval() < INTERVAL_THRESHOLD) {
+            throw new IllegalArgumentException("Profiler update interval cannot be null of less than " + INTERVAL_THRESHOLD + " milliseconds");
+        }
+
         this.getMetrics().validate();
+    }
+
+    public String getLogPath(){
+        return this.getHomePath() + File.separator + this.getFileName();
     }
 
     public static ProfilerSettings getDefault(){

@@ -4,6 +4,7 @@ import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Phase;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public interface Tracker {
@@ -19,9 +20,15 @@ public interface Tracker {
 
     LocalDateTime getFinish();
 
+    void setFinish(LocalDateTime finish);
+
     long getDuration();
 
+    void setDuration(long duration);
+
     Phase getPhase();
+
+    void setPhase(Phase phase);
 
     String getCluster();
 
@@ -35,15 +42,27 @@ public interface Tracker {
 
     void setProcess(String process);
 
+    default boolean hasPhase(){ return getPhase() != null; }
+
     default boolean hasCluster(){ return this.getCluster() != null && !this.getCluster().isEmpty(); }
 
     default boolean hasGroup(){ return this.getGroup() != null && !this.getGroup().isEmpty(); }
 
     default boolean hasProcess(){ return this.getProcess() != null && !this.getProcess().isEmpty(); }
 
-    Tracker finish(Object... args);
+    default Tracker finish(Object... args){
+        this.setFinish(LocalDateTime.now());
+        this.setPhase(Phase.FINISHED);
+        this.setDuration(ChronoUnit.MILLIS.between(this.getStart(), this.getFinish()));
+        Profiler.getInstance().process(this);
+        return this;
+    }
 
-    Tracker error(Exception e);
+    default Tracker error(Exception e) {
+        this.setPhase(Phase.ERROR);
+        Profiler.getInstance().process(this);
+        return this;
+    }
 
     default boolean isValid(){
         return this.getCluster() != null && !this.getCluster().isEmpty()
@@ -56,9 +75,10 @@ public interface Tracker {
                 .append("start").append(KEY_SEPARATOR).append(getStart()).append(VALUE_SEPARATOR)
                 .append("finish").append(KEY_SEPARATOR).append(getFinish()).append(VALUE_SEPARATOR)
                 .append("duration").append(KEY_SEPARATOR).append(getDuration()).append(VALUE_SEPARATOR)
-                .append("status").append(KEY_SEPARATOR).append(getPhase()).append(VALUE_SEPARATOR)
-                .append("groupName").append(KEY_SEPARATOR).append(getCluster()).append(VALUE_SEPARATOR)
-                .append("methodName").append(KEY_SEPARATOR).append(getProcess()).append(VALUE_SEPARATOR)
+                .append("phase").append(KEY_SEPARATOR).append(getPhase()).append(VALUE_SEPARATOR)
+                .append("cluster").append(KEY_SEPARATOR).append(getCluster()).append(VALUE_SEPARATOR)
+                .append("group").append(KEY_SEPARATOR).append(getGroup()).append(VALUE_SEPARATOR)
+                .append("process").append(KEY_SEPARATOR).append(getProcess()).append(VALUE_SEPARATOR)
                 .toString();
     }
 
