@@ -1,6 +1,6 @@
 package com.georgen.melquiades.model.data;
 
-import com.georgen.melquiades.core.Stat;
+import com.georgen.melquiades.model.Stat;
 
 import java.util.List;
 

@@ -23,6 +23,7 @@ public class Profiler {
 
     private Profiler(){ this(ProfilerSettings.getDefault()); }
 
+    //TODO: default ErrorHandler (profiler-error.log)
     private Profiler(ProfilerSettings settings){
         this(settings, e -> {});
     }

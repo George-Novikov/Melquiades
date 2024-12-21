@@ -1,5 +1,6 @@
-package com.georgen.melquiades.core;
+package com.georgen.melquiades.model;
 
+import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.settings.Metrics;
 import com.georgen.melquiades.util.Statistics;
 

@@ -1,4 +1,4 @@
-package com.georgen.melquiades.core;
+package com.georgen.melquiades.model;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.georgen.melquiades.model.trackers.Tracker;

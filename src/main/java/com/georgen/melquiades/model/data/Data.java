@@ -1,7 +1,7 @@
 package com.georgen.melquiades.model.data;
 
-import com.georgen.melquiades.core.Hits;
-import com.georgen.melquiades.core.Stat;
+import com.georgen.melquiades.model.Hits;
+import com.georgen.melquiades.model.Stat;
 
 public abstract class Data {
     private Hits hits;
