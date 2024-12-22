@@ -2,6 +2,7 @@ package com.georgen.melquiades.model;
 
 import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.settings.Metrics;
+import com.georgen.melquiades.util.Serializer;
 import com.georgen.melquiades.util.Statistics;
 
 import java.util.Collection;
@@ -10,6 +11,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Stat extends ConcurrentHashMap<String, Double> {
+
+    @Override
+    public String toString() {
+        try {
+            return Serializer.serialize(this);
+        } catch (Exception e){
+            return "{}";
+        }
+    }
 
     public static Stat of(Collection<Double> dataset){
         Metrics metrics = Profiler.metrics();
@@ -59,7 +69,7 @@ public class Stat extends ConcurrentHashMap<String, Double> {
             if (Metrics.isPercentile(metric)){
                 int percentile = Integer.parseInt(metric.substring(1));
                 List<Double> percList = batch.stream().map(s -> s.get(metric)).collect(Collectors.toList());
-                stat.put(Metrics.MIN, Statistics.percentile(percList, percentile));
+                stat.put(metric, Statistics.percentile(percList, percentile));
             }
         });
 

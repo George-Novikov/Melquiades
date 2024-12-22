@@ -1,7 +1,8 @@
 package com.georgen.melquiades.model;
 
-import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.georgen.melquiades.model.trackers.Tracker;
+import com.georgen.melquiades.util.Serializer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ public class Hits {
     private int running;
     private int success;
     private int errors;
-    @JSONField(serialize = false)
+    @JsonIgnore
     private List<UUID> runs = new ArrayList<>();
 
     public int getTotal() { return total; }
@@ -89,6 +90,15 @@ public class Hits {
 
     public void calculate(){
         this.total = this.running + this.success + this.errors;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return Serializer.serialize(this);
+        } catch (Exception e){
+            return "{}";
+        }
     }
 
     public static Hits ofBatch(List<Hits> hitsList){

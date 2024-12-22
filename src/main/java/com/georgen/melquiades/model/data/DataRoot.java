@@ -1,6 +1,10 @@
 package com.georgen.melquiades.model.data;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Hits;
 import com.georgen.melquiades.model.Stat;
@@ -10,14 +14,19 @@ import com.georgen.melquiades.model.trackers.Tracker;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import static com.georgen.melquiades.model.settings.LoggingPolicy.*;
 
+@JsonPropertyOrder({"start", "finish", "duration", "hits", "stat", "data"})
 public class DataRoot extends Data {
+
+    @JsonSerialize(using = ToStringSerializer.class)
     private LocalDateTime start;
+    @JsonSerialize(using = ToStringSerializer.class)
     private LocalDateTime finish;
     private Long duration;
     private ConcurrentMap<String, DataCluster> data;
@@ -42,6 +51,7 @@ public class DataRoot extends Data {
 
     public void setData(ConcurrentMap<String, DataCluster> data) { this.data = data; }
 
+    @JsonIgnore
     @Override
     public boolean isEmpty(){ return this.data == null || this.data.isEmpty(); }
 
@@ -60,6 +70,7 @@ public class DataRoot extends Data {
             DataCluster dataCluster = this.data.get(cluster);
             if (dataCluster == null) dataCluster = new DataCluster();
             dataCluster.register(tracker);
+            this.data.put(cluster, dataCluster);
         }
     }
 
@@ -73,12 +84,20 @@ public class DataRoot extends Data {
         this.data.values().forEach(DataCluster::calculate);
 
         if (Profiler.logging().isRootPolicy(HITS)){
-            List<Hits> hitsList = this.data.values().stream().map(DataCluster::getHits).collect(Collectors.toList());
+            List<Hits> hitsList = this.data.values()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(DataCluster::getHits)
+                    .collect(Collectors.toList());
             this.setHits(Hits.ofBatch(hitsList));
         }
 
         if (Profiler.logging().isRootPolicy(STAT)){
-            List<Stat> statList = this.data.values().stream().map(DataCluster::getStat).collect(Collectors.toList());
+            List<Stat> statList = this.data.values()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(DataCluster::getStat)
+                    .collect(Collectors.toList());
             this.setStat(Stat.ofBatch(statList));
         }
     }

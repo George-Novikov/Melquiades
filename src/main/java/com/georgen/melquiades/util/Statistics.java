@@ -16,8 +16,8 @@ public class Statistics {
         return sorted.get(rank - 1);
     }
 
-    public static <T extends Comparable<Double>> double avg(Collection<Double> dataset){
-        return dataset.stream().mapToDouble(x -> x).average().orElse(0.0);
+    public static <T extends Comparable<Double>> double avg(Collection<Double> dataset) {
+        return Math.floor(dataset.stream().mapToDouble(x -> x).average().orElse(0.0) * 1000) / 1000; // rounding to 3 signs after dot
     }
 
     public static <T extends Comparable<Double>> double mode(Collection<Double> dataset) {
@@ -40,15 +40,15 @@ public class Statistics {
         return modes.get(0);
     }
 
-    public static <T extends Comparable<Double>> double max(Collection<Double> dataset){
+    public static <T extends Comparable<Double>> double max(Collection<Double> dataset) {
         return dataset.stream().mapToDouble(x -> x).max().orElse(0.0);
     }
 
-    public static <T extends Comparable<Double>> double min(Collection<Double> dataset){
+    public static <T extends Comparable<Double>> double min(Collection<Double> dataset) {
         return dataset.stream().mapToDouble(x -> x).min().orElse(0.0);
     }
 
-    private static <T> void validate(Collection<T> dataset, double percentile){
+    private static <T> void validate(Collection<T> dataset, double percentile) {
         if (dataset == null || dataset.isEmpty()) {
             throw new IllegalArgumentException("The input dataset cannot be null or empty.");
         }

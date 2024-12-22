@@ -14,7 +14,7 @@ public class SlowProcess implements Runnable {
     @Operation(name = "slowRun", weight = 3)
     private void doRun(){
         try {
-            Tracker tracker = Tracker.start();
+            Tracker tracker = Tracker.start("general", "SlowProcess", "run()");
 
             int value = 0;
             for (int i = 0; i < 100000; i++){

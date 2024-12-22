@@ -9,8 +9,8 @@ import java.util.UUID;
 
 public interface Tracker {
 
-    String DEFAULT_CLUSTER = "default_cluster";
-    String DEFAULT_GROUP = "default_group";
+    String DEFAULT_CLUSTER = "DEFAULT_CLUSTER";
+    String DEFAULT_GROUP = "DEFAULT_GROUP";
     String KEY_SEPARATOR = "=";
     String VALUE_SEPARATOR = " ";
 

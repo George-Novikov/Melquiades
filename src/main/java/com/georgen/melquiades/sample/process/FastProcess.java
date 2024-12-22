@@ -8,7 +8,7 @@ public class FastProcess implements Runnable {
     @Operation(name = "fastRun", weight = 1)
     @Override
     public void run() {
-        Tracker tracker = Tracker.start("FastProcess", "run()");
+        Tracker tracker = Tracker.start("general", "FastProcess", "run()");
 
         int value = 0;
         for (int i = 0; i < 100000; i++){

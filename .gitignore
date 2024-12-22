@@ -2,9 +2,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-tracker.log
-profiler.log
-log-folder/**
+profiler.error.log
+profiler.jsonl
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

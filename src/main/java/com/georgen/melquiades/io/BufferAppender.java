@@ -53,6 +53,7 @@ public class BufferAppender implements AutoCloseable  {
 
     public void append(String message) {
         try {
+            System.out.println("Writing to file: " + path.toAbsolutePath());
             writer.append(message);
             writer.newLine();
             writer.flush();

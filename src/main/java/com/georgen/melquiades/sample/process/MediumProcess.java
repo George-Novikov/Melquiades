@@ -9,7 +9,7 @@ public class MediumProcess implements Runnable {
     @Override
     public void run() {
         try {
-            Tracker tracker = Tracker.start("MediumProcess.run()");
+            Tracker tracker = Tracker.start("general", "MediumProcess", "run()");
 
             int value = 0;
             for (int i = 0; i < 100000; i++){
