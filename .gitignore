@@ -4,6 +4,7 @@ target/
 !**/src/test/**/target/
 profiler.error.log
 profiler.jsonl
+*.zip
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

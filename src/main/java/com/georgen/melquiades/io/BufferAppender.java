@@ -1,6 +1,7 @@
 package com.georgen.melquiades.io;
 
 import com.georgen.melquiades.model.handlers.ErrorHandler;
+import com.georgen.melquiades.util.LogRotator;
 import com.georgen.melquiades.util.SystemHelper;
 
 import java.io.BufferedWriter;
@@ -34,15 +35,15 @@ public class BufferAppender implements AutoCloseable  {
             Path parent = path.getParent();
             if (parent != null) Files.createDirectories(path.getParent());
             Files.createFile(path);
+
+            if (SystemHelper.isUnixSystem()){
+                SystemHelper.setFilePermissions(path.toFile());
+            }
         }
 
         this.path = path;
         this.writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
         this.errorHandler = errorHandler;
-
-        if (SystemHelper.isUnixSystem()){
-            SystemHelper.setFilePermissions(path.toFile());
-        }
     }
 
     public Path getPath() { return path; }
@@ -53,7 +54,6 @@ public class BufferAppender implements AutoCloseable  {
 
     public void append(String message) {
         try {
-            System.out.println("Writing to file: " + path.toAbsolutePath());
             writer.append(message);
             writer.newLine();
             writer.flush();

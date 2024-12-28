@@ -11,7 +11,6 @@ public class Serializer {
     /** Thread-safe wrapper (Bill Pugh Singleton). Do not refactor. */
     private static class Holder {
         private static final int DEFAULT_POOL_SIZE = 10;
-        private static final ObjectMapper SERIALIZER = newMapper();
         private static final ConcurrentLinkedDeque<ObjectMapper> POOL = initPool();
     }
 
@@ -20,7 +19,6 @@ public class Serializer {
         if (mapper == null) mapper = newMapper();
         String json = mapper.writeValueAsString(object);
         Holder.POOL.offerLast(mapper);
-        System.out.println("Serializer pool size after serializing: " + Holder.POOL.size());
         return json;
     }
 
@@ -29,8 +27,14 @@ public class Serializer {
         if (mapper == null) mapper = newMapper();
         T object = mapper.readValue(json, javaClass);
         Holder.POOL.offerLast(mapper);
-        System.out.println("Serializer pool size after deserializing: " + Holder.POOL.size());
         return object;
+    }
+
+    public static void shrink(){
+        Holder.POOL.clear();
+        IntStream.range(0, Holder.DEFAULT_POOL_SIZE).forEach(i -> {
+            Holder.POOL.offerLast(newMapper());
+        });
     }
 
     private static ObjectMapper newMapper(){

@@ -33,7 +33,7 @@ public class Stat extends ConcurrentHashMap<String, Double> {
 
             if (Metrics.isPercentile(metric)){
                 int percentile = Integer.parseInt(metric.substring(1));
-                stat.put(metric, Statistics.percentile(dataset, percentile));
+                stat.put(metric, Statistics.percentile(percentile, dataset));
             }
         });
 
@@ -69,7 +69,7 @@ public class Stat extends ConcurrentHashMap<String, Double> {
             if (Metrics.isPercentile(metric)){
                 int percentile = Integer.parseInt(metric.substring(1));
                 List<Double> percList = batch.stream().map(s -> s.get(metric)).collect(Collectors.toList());
-                stat.put(metric, Statistics.percentile(percList, percentile));
+                stat.put(metric, Statistics.percentile(percentile, percList));
             }
         });
 

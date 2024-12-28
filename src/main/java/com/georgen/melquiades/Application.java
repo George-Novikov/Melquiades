@@ -2,9 +2,6 @@ package com.georgen.melquiades;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.georgen.melquiades.core.Profiler;
-import com.georgen.melquiades.io.BufferReader;
-import com.georgen.melquiades.model.Hits;
-import com.georgen.melquiades.model.data.DataCluster;
 import com.georgen.melquiades.model.data.DataRoot;
 import com.georgen.melquiades.model.settings.ProfilerSettings;
 import com.georgen.melquiades.model.trackers.Tracker;
@@ -15,11 +12,7 @@ import com.georgen.melquiades.sample.process.SlowProcess;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 
 public class Application {
 
@@ -75,8 +68,8 @@ public class Application {
 
             Profiler.shutdown();
 
-            LocalDateTime start = LocalDateTime.parse("2024-12-22T20:57:16", DATE_TIME_FORMATTER);
-            LocalDateTime finish = LocalDateTime.parse("2024-12-22T22:11:30", DATE_TIME_FORMATTER);
+            LocalDateTime start = LocalDateTime.parse("2024-12-26T22:48:40", DATE_TIME_FORMATTER);
+            LocalDateTime finish = LocalDateTime.parse("2024-12-26T22:48:46", DATE_TIME_FORMATTER);
 
             List<DataRoot> dataList = Profiler.report(start, finish);
             System.out.println(dataList.size());
@@ -85,17 +78,19 @@ public class Application {
                 System.out.println(dl.getDuration());
             });
 
-            ConcurrentMap<String, DataCluster> clusters = dataList.get(0).getData();
-            clusters.forEach((k, v) -> {
-                System.out.println(v.getHits());
-                System.out.println(v.getStat());
-            });
+            DataRoot dataRoot = dataList.get(0);
 
-            clusters = dataList.get(2).getData();
-            clusters.forEach((k, v) -> {
-                System.out.println(v.getHits());
-                System.out.println(v.getStat());
-            });
+//            ConcurrentMap<String, DataCluster> clusters = dataRoot.getData();
+//            clusters.forEach((k, v) -> {
+//                System.out.println(v.getHits());
+//                System.out.println(v.getStat());
+//            });
+//
+//            clusters = dataList.get(2).getData();
+//            clusters.forEach((k, v) -> {
+//                System.out.println(v.getHits());
+//                System.out.println(v.getStat());
+//            });
 
 
         } catch (Exception e){

@@ -1,7 +1,6 @@
 package com.georgen.melquiades.core;
 
 import com.georgen.melquiades.io.BufferAppender;
-import com.georgen.melquiades.io.BufferReader;
 import com.georgen.melquiades.model.data.DataRoot;
 import com.georgen.melquiades.model.handlers.ErrorHandler;
 import com.georgen.melquiades.model.handlers.ErrorLogger;
@@ -10,10 +9,12 @@ import com.georgen.melquiades.model.settings.Logging;
 import com.georgen.melquiades.model.settings.Metrics;
 import com.georgen.melquiades.model.settings.ProfilerSettings;
 import com.georgen.melquiades.model.trackers.Tracker;
+import com.georgen.melquiades.util.LogRotator;
 import com.georgen.melquiades.util.Serializer;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -30,6 +31,7 @@ public class Profiler implements Closeable {
     private SuccessHandler successHandler;
     private DataRoot data;
     private boolean isWorking;
+    private LocalDate today;
 
 
     // ============================================= Constructors ============================================= //
@@ -87,8 +89,8 @@ public class Profiler implements Closeable {
 
         int schedulerThreads = threads % 2 == 0 ? threads / 2 : threads / 2 + 1;
         int executorThreads = threads / 2;
-
         int interval = settings.getInterval();
+
         // At this point schedulerThreads is always a positive number
         scheduler = Executors.newScheduledThreadPool(schedulerThreads);
         scheduler.scheduleAtFixedRate(this::rotateReport, interval, interval, TimeUnit.MILLISECONDS);
@@ -96,7 +98,7 @@ public class Profiler implements Closeable {
         if (executorThreads > 0){
             executor = Executors.newFixedThreadPool(executorThreads);
         } else {
-            executor = null; // This is needed to switch multithreaded mode to single threaded when changing settings
+            executor = null; // This is necessary to switch multithreaded mode to single threaded when changing settings
         }
 
         this.isWorking = true;
@@ -144,6 +146,7 @@ public class Profiler implements Closeable {
 
     private void rotateReport(){
         try {
+            performDayCheck();
             this.data.calculate();
             String jsonReport = Serializer.serialize(this.data);
             try (BufferAppender appender = new BufferAppender(settings.getLogPath())) {
@@ -163,6 +166,7 @@ public class Profiler implements Closeable {
         try {
             if (this.data == null) this.data = new DataRoot();
             this.data.register(tracker);
+            if (successHandler != null) successHandler.handle(tracker);
         } catch (Exception e) {
             this.errorHandler.handle(e);
         }
@@ -179,6 +183,16 @@ public class Profiler implements Closeable {
     private void validate(ProfilerSettings settings){
         if (settings == null) throw new IllegalArgumentException("Profiler settings cannot be null");
         settings.validate();
+    }
+
+    private void performDayCheck() throws IOException {
+        if (today == null || today.isBefore(LocalDate.now())){
+            if (LogRotator.isOldFile(settings.getLogPath())){
+                LogRotator.zipRotate(settings.getLogPath());
+            }
+
+            today = LocalDate.now();
+        }
     }
 
 

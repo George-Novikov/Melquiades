@@ -1,6 +1,7 @@
 package com.georgen.melquiades.model.handlers;
 
 import com.georgen.melquiades.io.BufferAppender;
+import com.georgen.melquiades.util.LogRotator;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,11 +26,17 @@ public class ErrorLogger implements ErrorHandler {
 
     public ErrorLogger(Path logPath){
         this.logPath = logPath;
+
+
     }
 
     @Override
     public void handle(Exception e) {
         try (BufferAppender appender = new BufferAppender(logPath)) {
+            if (LogRotator.isOldFile(logPath)){
+                LogRotator.zipRotate(logPath);
+            }
+
             appender.append(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " - " + e.getClass().getSimpleName() + ": " + e.getMessage());
             appender.append(Arrays.toString(e.getStackTrace()));
         } catch (Exception er){

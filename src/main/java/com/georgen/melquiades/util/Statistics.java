@@ -9,7 +9,7 @@ public class Statistics {
         return percentile == 0 ? 1 : (int) Math.ceil(percentile / 100.0 * dataset.size());
     }
 
-    public static <T extends Comparable<Double>> double percentile(Collection<Double> dataset, double percentile) {
+    public static <T extends Comparable<Double>> double percentile(double percentile, Collection<Double> dataset) {
         validate(dataset, percentile);
         List<Double> sorted = dataset.stream().sorted().collect(Collectors.toList());
         int rank = rank(dataset, percentile);
@@ -46,6 +46,26 @@ public class Statistics {
 
     public static <T extends Comparable<Double>> double min(Collection<Double> dataset) {
         return dataset.stream().mapToDouble(x -> x).min().orElse(0.0);
+    }
+
+    public static <T extends Comparable<Double>> double percentile(double percentile, Double... dataset){
+        return percentile(percentile, Arrays.asList(dataset));
+    }
+
+    public static <T extends Comparable<Double>> double avg(Double... dataset){
+        return avg(Arrays.asList(dataset));
+    }
+
+    public static <T extends Comparable<Double>> double mode(Double... dataset){
+        return mode(Arrays.asList(dataset));
+    }
+
+    public static <T extends Comparable<Double>> double max(Double... dataset){
+        return max(Arrays.asList(dataset));
+    }
+
+    public static <T extends Comparable<Double>> double min(Double... dataset){
+        return min(Arrays.asList(dataset));
     }
 
     private static <T> void validate(Collection<T> dataset, double percentile) {

@@ -21,9 +21,6 @@ public class ReportBuilder {
             String stringStart = wrapForSearch(DATE_TIME_FORMATTER.format(start));
             String stringFinish = wrapForSearch(DATE_TIME_FORMATTER.format(finish));
 
-            System.out.println("Start search fragment: " + stringStart);
-            System.out.println("Finish search fragment: " + stringFinish);
-
             long startPosition = reader.firstPosition(stringStart);
             long finishPosition = reader.lastPosition(stringFinish);
 
