@@ -5,6 +5,7 @@ import com.georgen.melquiades.model.data.DataRoot;
 import com.georgen.melquiades.model.handlers.ErrorHandler;
 import com.georgen.melquiades.model.handlers.ErrorLogger;
 import com.georgen.melquiades.model.handlers.SuccessHandler;
+import com.georgen.melquiades.model.historic.HistoryReport;
 import com.georgen.melquiades.model.settings.Logging;
 import com.georgen.melquiades.model.settings.Metrics;
 import com.georgen.melquiades.model.settings.ProfilerSettings;
@@ -29,6 +30,7 @@ public class Profiler implements Closeable {
     private ExecutorService executor;
     private ErrorHandler errorHandler;
     private SuccessHandler successHandler;
+    private History history;
     private DataRoot data;
     private boolean isWorking;
     private LocalDate today;
@@ -56,6 +58,8 @@ public class Profiler implements Closeable {
     // ============================================= Accessors ============================================= //
 
     public DataRoot getData() { return data; }
+
+    public HistoryReport getHistoryReport() { return history.getReport(); }
 
     public ProfilerSettings getSettings() {
         if (settings == null) settings = ProfilerSettings.getDefault();
@@ -101,6 +105,7 @@ public class Profiler implements Closeable {
             executor = null; // This is necessary to switch multithreaded mode to single threaded when changing settings
         }
 
+        this.history = new History(settings);
         this.isWorking = true;
         return this;
     }
@@ -151,6 +156,9 @@ public class Profiler implements Closeable {
             String jsonReport = Serializer.serialize(this.data);
             try (BufferAppender appender = new BufferAppender(settings.getLogPath())) {
                 appender.append(jsonReport);
+            }
+            if (settings.isHistoric()){
+                this.history.update(this.data);
             }
             this.data = new DataRoot();
         } catch (Exception e){
@@ -224,6 +232,8 @@ public class Profiler implements Closeable {
     public static Logging logging(){
         return settings().getLogging();
     }
+
+    public static HistoryReport history(){ return getInstance().getHistoryReport(); }
 
     public static void errorHandler(ErrorHandler errorHandler){
         getInstance().setErrorHandler(errorHandler);

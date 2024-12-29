@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class YearReport extends HistoricReport {
+public class YearReport extends HistoryReport {
     private ConcurrentMap<Integer, MonthReport> months;
 
     public YearReport(){
@@ -27,5 +27,6 @@ public class YearReport extends HistoricReport {
         MonthReport report = months.get(month);
         if (report == null) report = new MonthReport();
         report.consume(data);
+        months.put(month, report);
     }
 }

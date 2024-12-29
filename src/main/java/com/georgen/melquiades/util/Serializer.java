@@ -2,6 +2,7 @@ package com.georgen.melquiades.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.IntStream;
@@ -40,6 +41,7 @@ public class Serializer {
     private static ObjectMapper newMapper(){
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         return mapper;
     }
 

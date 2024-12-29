@@ -5,6 +5,7 @@ import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Intersection;
 import com.georgen.melquiades.model.data.DataCluster;
 import com.georgen.melquiades.model.data.DataRoot;
+import com.georgen.melquiades.model.settings.HistoryDepth;
 import com.georgen.melquiades.model.settings.ProfilerSettings;
 import com.georgen.melquiades.core.trackers.Tracker;
 import com.georgen.melquiades.sample.WorkerChain;
@@ -25,12 +26,10 @@ public class Application {
     public static void main(String[] args) {
 
         try {
-            System.out.println(ManagementFactory.getRuntimeMXBean().getName());
-
             ProfilerSettings settings = Profiler.settings()
-                    .enable();
-
-            Profiler.launch(settings);
+                    .historyDepth(HistoryDepth.WEEK)
+                    .enable()
+                    .launch();
 
             System.out.println("Profiler is working: " + Profiler.isEnabled());
             Tracker globalTracker = Tracker.start("global", "Application", "main");
@@ -74,8 +73,8 @@ public class Application {
 
             Profiler.shutdown();
 
-            LocalDateTime start = LocalDateTime.parse("2024-12-28T17:26:56", DATE_TIME_FORMATTER);
-            LocalDateTime finish = LocalDateTime.parse("2024-12-28T17:27:02", DATE_TIME_FORMATTER);
+            LocalDateTime start = LocalDateTime.parse("2024-12-29T09:34:14", DATE_TIME_FORMATTER);
+            LocalDateTime finish = LocalDateTime.parse("2024-12-29T12:25:02", DATE_TIME_FORMATTER);
 
             List<DataRoot> dataList = Profiler.report(start, finish);
             System.out.println(dataList.size());

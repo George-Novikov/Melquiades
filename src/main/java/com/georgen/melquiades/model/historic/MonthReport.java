@@ -7,7 +7,7 @@ import java.time.temporal.ChronoField;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class MonthReport extends HistoricReport {
+public class MonthReport extends HistoryReport {
     private ConcurrentMap<Integer, WeekReport> weeks;
 
     public MonthReport() {
@@ -28,5 +28,6 @@ public class MonthReport extends HistoricReport {
         WeekReport report = weeks.get(week);
         if (report == null) report = new WeekReport();
         report.consume(data);
+        weeks.put(week, report);
     }
 }

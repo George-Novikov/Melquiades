@@ -32,13 +32,7 @@ public class BufferAppender implements AutoCloseable  {
 
     public BufferAppender(Path path, ErrorHandler errorHandler) throws IOException {
         if (!Files.exists(path)){
-            Path parent = path.getParent();
-            if (parent != null) Files.createDirectories(path.getParent());
-            Files.createFile(path);
-
-            if (SystemHelper.isUnixSystem()){
-                SystemHelper.setFilePermissions(path.toFile());
-            }
+            SystemHelper.createFile(path);
         }
 
         this.path = path;

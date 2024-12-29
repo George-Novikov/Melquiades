@@ -1,10 +1,14 @@
 package com.georgen.melquiades.model.settings;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.handlers.ErrorHandler;
+import com.georgen.melquiades.model.handlers.SuccessHandler;
 
 import java.io.File;
 
+@JsonPropertyOrder({"enabled", "threads", "interval", "homePath", "fileName", "metrics", "logging", "blacklist", "historyDepth"})
 public class ProfilerSettings {
 
     public static int INTERVAL_THRESHOLD = 200; // Profiling anything in less than 200 milliseconds doesn't make sense
@@ -17,6 +21,7 @@ public class ProfilerSettings {
     private Metrics metrics;
     private Logging logging;
     private Blacklist blacklist;
+    private HistoryDepth historyDepth;
 
     public Boolean isEnabled() { return isEnabled != null ? isEnabled : Boolean.FALSE; }
 
@@ -59,6 +64,21 @@ public class ProfilerSettings {
 
     public void setBlacklist(Blacklist blacklist) { this.blacklist = blacklist; }
 
+    public HistoryDepth getHistoryDepth() {
+        if (historyDepth == null) historyDepth = HistoryDepth.NONE;
+        return historyDepth;
+    }
+
+    public void setHistoryDepth(HistoryDepth historyDepth) {
+        this.historyDepth = historyDepth;
+    }
+
+    @JsonIgnore
+    public boolean isHistoric(){
+        return !this.getHistoryDepth().equals(HistoryDepth.NONE);
+    }
+
+    @JsonIgnore
     public boolean isBlacklisted(String name, DataType type){
         return getBlacklist().isBlacklisted(name, type);
     }
@@ -79,6 +99,7 @@ public class ProfilerSettings {
         this.getMetrics().validate();
     }
 
+    @JsonIgnore
     public String getLogPath(){
         return this.getHomePath() + File.separator + this.getFileName();
     }
@@ -130,8 +151,18 @@ public class ProfilerSettings {
         return this;
     }
 
+    public ProfilerSettings historyDepth(HistoryDepth depth){
+        this.setHistoryDepth(depth);
+        return this;
+    }
+
     public ProfilerSettings errorHandler(ErrorHandler errorHandler){
         Profiler.getInstance().setErrorHandler(errorHandler);
+        return this;
+    }
+
+    public ProfilerSettings successHandler(SuccessHandler successHandler){
+        Profiler.getInstance().setSuccessHandler(successHandler);
         return this;
     }
 
