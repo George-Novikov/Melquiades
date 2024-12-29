@@ -1,7 +1,7 @@
 package com.georgen.melquiades.sample.process;
 
 import com.georgen.melquiades.api.Operation;
-import com.georgen.melquiades.model.trackers.Tracker;
+import com.georgen.melquiades.core.trackers.Tracker;
 
 public class MediumProcess implements Runnable {
 

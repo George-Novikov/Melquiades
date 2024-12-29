@@ -2,14 +2,18 @@ package com.georgen.melquiades;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.georgen.melquiades.core.Profiler;
+import com.georgen.melquiades.model.Intersection;
+import com.georgen.melquiades.model.data.DataCluster;
 import com.georgen.melquiades.model.data.DataRoot;
 import com.georgen.melquiades.model.settings.ProfilerSettings;
-import com.georgen.melquiades.model.trackers.Tracker;
+import com.georgen.melquiades.core.trackers.Tracker;
 import com.georgen.melquiades.sample.WorkerChain;
 import com.georgen.melquiades.sample.process.FastProcess;
 import com.georgen.melquiades.sample.process.MediumProcess;
 import com.georgen.melquiades.sample.process.SlowProcess;
+import com.georgen.melquiades.util.Serializer;
 
+import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -21,6 +25,8 @@ public class Application {
     public static void main(String[] args) {
 
         try {
+            System.out.println(ManagementFactory.getRuntimeMXBean().getName());
+
             ProfilerSettings settings = Profiler.settings()
                     .enable();
 
@@ -68,8 +74,8 @@ public class Application {
 
             Profiler.shutdown();
 
-            LocalDateTime start = LocalDateTime.parse("2024-12-26T22:48:40", DATE_TIME_FORMATTER);
-            LocalDateTime finish = LocalDateTime.parse("2024-12-26T22:48:46", DATE_TIME_FORMATTER);
+            LocalDateTime start = LocalDateTime.parse("2024-12-28T17:26:56", DATE_TIME_FORMATTER);
+            LocalDateTime finish = LocalDateTime.parse("2024-12-28T17:27:02", DATE_TIME_FORMATTER);
 
             List<DataRoot> dataList = Profiler.report(start, finish);
             System.out.println(dataList.size());
@@ -79,6 +85,24 @@ public class Application {
             });
 
             DataRoot dataRoot = dataList.get(0);
+            DataCluster dataCluster1 = dataRoot.getData().get("general");
+            DataCluster dataCluster2 = dataRoot.getData().get("global");
+
+            List<Intersection> intersections1 = Intersection.of(dataRoot, "p50");
+            System.out.println(
+                    Serializer.serialize(intersections1)
+            );
+
+            List<Intersection> intersections2 = Intersection.of(dataCluster1, "p75");
+            System.out.println(
+                    Serializer.serialize(intersections2)
+            );
+
+            List<Intersection> intersections3 = Intersection.of(dataCluster2, "p95");
+            System.out.println(
+                    Serializer.serialize(intersections3)
+            );
+
 
 //            ConcurrentMap<String, DataCluster> clusters = dataRoot.getData();
 //            clusters.forEach((k, v) -> {

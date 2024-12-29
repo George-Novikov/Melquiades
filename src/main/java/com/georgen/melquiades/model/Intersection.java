@@ -3,6 +3,7 @@ package com.georgen.melquiades.model;
 import com.georgen.melquiades.model.data.*;
 import com.georgen.melquiades.model.settings.DataType;
 import com.georgen.melquiades.model.settings.Metrics;
+import com.georgen.melquiades.util.Serializer;
 import com.georgen.melquiades.util.Statistics;
 
 import java.util.ArrayList;
@@ -41,6 +42,15 @@ public class Intersection {
     public double getValue() { return value; }
 
     public void setValue(double value) { this.value = value; }
+
+    @Override
+    public String toString(){
+        try {
+            return Serializer.serialize(this);
+        } catch (Exception e){
+            return "{}";
+        }
+    }
 
     public static List<Intersection> of(DataRoot root, String metric){
         List<Intersection> intersections = new ArrayList<>();

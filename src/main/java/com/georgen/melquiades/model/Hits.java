@@ -1,7 +1,7 @@
 package com.georgen.melquiades.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.georgen.melquiades.model.trackers.Tracker;
+import com.georgen.melquiades.core.trackers.Tracker;
 import com.georgen.melquiades.util.Serializer;
 
 import java.util.ArrayList;
@@ -90,6 +90,14 @@ public class Hits {
 
     public void calculate(){
         this.total = this.running + this.success + this.errors;
+    }
+
+    public void averageWith(Hits outerHits){
+        if (outerHits == null) return;
+        this.total = (this.total + outerHits.getTotal()) / 2;
+        this.running = (this.running + outerHits.getRunning()) / 2;
+        this.success = (this.success + outerHits.getSuccess()) / 2;
+        this.errors = (this.errors + outerHits.getErrors()) / 2;
     }
 
     @Override

@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Hits;
 import com.georgen.melquiades.model.Stat;
-import com.georgen.melquiades.model.trackers.Tracker;
+import com.georgen.melquiades.core.trackers.Tracker;
 
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.georgen.melquiades.model.settings.LoggingPolicy.*;
 
@@ -50,6 +52,18 @@ public class DataProcess extends Data {
 
         if (Profiler.logging().isProcessPolicy(STAT)){
             this.setStat(Stat.of(this.data));
+        }
+    }
+
+    public void averageWith(DataProcess outerData){
+        if (this.hasHits()){
+            Hits outerHits = outerData.getHits();
+            this.getHits().averageWith(outerHits); // null check is inside
+        }
+
+        if (this.hasStat()){
+            Stat outerStat = outerData.getStat();
+            this.getStat().averageWith(outerStat); // null check is inside
         }
     }
 }

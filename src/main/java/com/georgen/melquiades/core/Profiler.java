@@ -8,7 +8,7 @@ import com.georgen.melquiades.model.handlers.SuccessHandler;
 import com.georgen.melquiades.model.settings.Logging;
 import com.georgen.melquiades.model.settings.Metrics;
 import com.georgen.melquiades.model.settings.ProfilerSettings;
-import com.georgen.melquiades.model.trackers.Tracker;
+import com.georgen.melquiades.core.trackers.Tracker;
 import com.georgen.melquiades.util.LogRotator;
 import com.georgen.melquiades.util.Serializer;
 

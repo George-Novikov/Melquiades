@@ -9,7 +9,7 @@ import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Hits;
 import com.georgen.melquiades.model.Stat;
 import com.georgen.melquiades.model.settings.DataType;
-import com.georgen.melquiades.model.trackers.Tracker;
+import com.georgen.melquiades.core.trackers.Tracker;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -100,5 +100,17 @@ public class DataRoot extends Data {
                     .collect(Collectors.toList());
             this.setStat(Stat.ofBatch(statList));
         }
+    }
+
+    public void averageWith(DataRoot outerData){
+        if (this.data == null) this.data = new ConcurrentHashMap<>();
+
+        ConcurrentMap<String, DataCluster> clusters = outerData.getData();
+
+        clusters.forEach((k,v)->{
+            DataCluster cluster = this.data.get(k);
+            if (cluster == null) return;
+            cluster.averageWith(v);
+        });
     }
 }

@@ -1,4 +1,4 @@
-package com.georgen.melquiades.model.trackers;
+package com.georgen.melquiades.core.trackers;
 
 import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Phase;

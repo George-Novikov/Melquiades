@@ -1,10 +1,8 @@
-package com.georgen.melquiades.model.trackers;
+package com.georgen.melquiades.core.trackers;
 
-import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Phase;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public class NamedTracker implements Tracker {

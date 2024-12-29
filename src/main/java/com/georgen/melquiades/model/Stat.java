@@ -12,6 +12,22 @@ import java.util.stream.Collectors;
 
 public class Stat extends ConcurrentHashMap<String, Double> {
 
+    public void averageWith(Stat outerStat){
+        if (outerStat == null) return;
+        outerStat.forEach((k,v) -> {
+            Double innerValue = this.get(k);
+            if (innerValue == null || v == null) return;
+
+            if (Metrics.isPercentile(k)){
+                int percentile = Integer.parseInt(k.substring(1));
+                double pcValue = Statistics.percentile(percentile, innerValue, v);
+                this.put(k, pcValue);
+            } else {
+                this.put(k, (innerValue + v) / 2);
+            }
+        });
+    }
+
     @Override
     public String toString() {
         try {

@@ -6,7 +6,7 @@ import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Hits;
 import com.georgen.melquiades.model.Stat;
 import com.georgen.melquiades.model.settings.DataType;
-import com.georgen.melquiades.model.trackers.Tracker;
+import com.georgen.melquiades.core.trackers.Tracker;
 
 import java.util.List;
 import java.util.Objects;
@@ -71,5 +71,17 @@ public class DataCluster extends Data {
                     .collect(Collectors.toList());
             this.setStat(Stat.ofBatch(statList));
         }
+    }
+
+    public void averageWith(DataCluster outerData){
+        if (this.data == null) this.data = new ConcurrentHashMap<>();
+
+        ConcurrentMap<String, DataGroup> groups = outerData.getData();
+
+        groups.forEach((k, v) -> {
+            DataGroup group = this.data.get(k);
+            if (group == null) return;
+            group.averageWith(v);
+        });
     }
 }

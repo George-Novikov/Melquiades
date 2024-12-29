@@ -2,7 +2,7 @@ package com.georgen.melquiades.model.data;
 
 import com.georgen.melquiades.model.Hits;
 import com.georgen.melquiades.model.Stat;
-import com.georgen.melquiades.model.trackers.Tracker;
+import com.georgen.melquiades.core.trackers.Tracker;
 
 public abstract class Data {
     private Hits hits;

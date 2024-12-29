@@ -1,17 +1,9 @@
-package com.georgen.melquiades.model.trackers;
+package com.georgen.melquiades.core.trackers;
 
-import com.georgen.melquiades.api.Operation;
-import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Phase;
-import com.georgen.melquiades.util.OperationExtractor;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /** This class is MUCH more expensive because of getStackTrace() method */
 public class StackTracker extends Throwable implements Tracker {
