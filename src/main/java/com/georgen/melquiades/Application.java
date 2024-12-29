@@ -2,6 +2,8 @@ package com.georgen.melquiades;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.georgen.melquiades.core.Profiler;
+import com.georgen.melquiades.core.ReportBuilder;
+import com.georgen.melquiades.io.BufferReader;
 import com.georgen.melquiades.model.Intersection;
 import com.georgen.melquiades.model.data.DataCluster;
 import com.georgen.melquiades.model.data.DataRoot;
@@ -26,10 +28,14 @@ public class Application {
     public static void main(String[] args) {
 
         try {
-            ProfilerSettings settings = Profiler.settings()
+            ProfilerSettings settings = ProfilerSettings.getDefault()
+                    .threads(2)
+                    .emptyWrite(false)
                     .historyDepth(HistoryDepth.WEEK)
                     .enable()
                     .launch();
+
+            System.out.println(Serializer.serialize(settings));
 
             System.out.println("Profiler is working: " + Profiler.isEnabled());
             Tracker globalTracker = Tracker.start("global", "Application", "main");
@@ -50,8 +56,6 @@ public class Application {
 
             chain.run();
 
-            DataRoot data = Profiler.getInstance().getData();
-
             chain = new WorkerChain(
                     new FastProcess(), new FastProcess(), new FastProcess(),
                     new FastProcess(), new FastProcess(), new FastProcess(),
@@ -62,22 +66,14 @@ public class Application {
 
             globalTracker.finish();
 
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.findAndRegisterModules();
-
-            String json = mapper.writeValueAsString(data);
-            System.out.println(json);
-            DataRoot deserialized = mapper.readValue(json, DataRoot.class);
-            System.out.println("Deserialized start: " + deserialized.getStart());
-            System.out.println("Deserialized finish: " + deserialized.getFinish());
-
             Profiler.shutdown();
 
-            LocalDateTime start = LocalDateTime.parse("2024-12-29T09:34:14", DATE_TIME_FORMATTER);
-            LocalDateTime finish = LocalDateTime.parse("2024-12-29T12:25:02", DATE_TIME_FORMATTER);
+            LocalDateTime start = LocalDateTime.parse("2024-12-29T12:27:33", DATE_TIME_FORMATTER);
+            LocalDateTime finish = LocalDateTime.parse("2024-12-29T12:28:01", DATE_TIME_FORMATTER);
 
-            List<DataRoot> dataList = Profiler.report(start, finish);
+            List<DataRoot> dataList = Profiler.report(start, finish, 2);
             System.out.println(dataList.size());
+            if (dataList.isEmpty()) return;
 
             dataList.forEach(dl -> {
                 System.out.println(dl.getDuration());

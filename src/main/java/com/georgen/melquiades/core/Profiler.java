@@ -152,11 +152,18 @@ public class Profiler implements Closeable {
     private void rotateReport(){
         try {
             performDayCheck();
+
             this.data.calculate();
+            if (this.data.isEmpty() && !settings.isEmptyWrite()){
+                this.data = new DataRoot();
+                return;
+            }
+
             String jsonReport = Serializer.serialize(this.data);
             try (BufferAppender appender = new BufferAppender(settings.getLogPath())) {
                 appender.append(jsonReport);
             }
+
             if (settings.isHistoric()){
                 this.history.update(this.data);
             }
@@ -250,6 +257,10 @@ public class Profiler implements Closeable {
 
     public static List<DataRoot> report(LocalDateTime start, LocalDateTime finish) throws IOException {
         return ReportBuilder.getReport(start, finish);
+    }
+
+    public static List<DataRoot> report(LocalDateTime start, LocalDateTime finish, int clearance) throws IOException {
+        return ReportBuilder.getReport(start, finish, clearance);
     }
 
     public static void shutdown(){

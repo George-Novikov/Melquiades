@@ -8,7 +8,7 @@ import com.georgen.melquiades.model.handlers.SuccessHandler;
 
 import java.io.File;
 
-@JsonPropertyOrder({"enabled", "threads", "interval", "homePath", "fileName", "metrics", "logging", "blacklist", "historyDepth"})
+@JsonPropertyOrder({"enabled", "threads", "interval", "homePath", "fileName", "emptyWrite", "metrics", "logging", "blacklist", "historyDepth"})
 public class ProfilerSettings {
 
     public static int INTERVAL_THRESHOLD = 200; // Profiling anything in less than 200 milliseconds doesn't make sense
@@ -18,6 +18,7 @@ public class ProfilerSettings {
     private Integer interval;
     private String homePath;
     private String fileName;
+    private Boolean isEmptyWrite;
     private Metrics metrics;
     private Logging logging;
     private Blacklist blacklist;
@@ -42,6 +43,10 @@ public class ProfilerSettings {
     public String getFileName() { return fileName; }
 
     public void setFileName(String fileName) { this.fileName = fileName; }
+
+    public Boolean isEmptyWrite() { return isEmptyWrite != null ? isEmptyWrite : Boolean.TRUE; }
+
+    public void setEmptyWrite(Boolean emptyWrite) { isEmptyWrite = emptyWrite; }
 
     public Metrics getMetrics() {
         if (metrics == null) metrics = new Metrics();
@@ -121,6 +126,11 @@ public class ProfilerSettings {
         return this;
     }
 
+    public ProfilerSettings interval(int interval){
+        this.setInterval(interval);
+        return this;
+    }
+
     public ProfilerSettings homePath(String homePath){
         this.setHomePath(homePath);
         return this;
@@ -131,8 +141,8 @@ public class ProfilerSettings {
         return this;
     }
 
-    public ProfilerSettings interval(int interval){
-        this.setInterval(interval);
+    public ProfilerSettings emptyWrite(Boolean isEmptyWrite){
+        this.setEmptyWrite(isEmptyWrite);
         return this;
     }
 
@@ -167,7 +177,7 @@ public class ProfilerSettings {
     }
 
     public ProfilerSettings launch(){
-        Profiler.launch();
+        Profiler.launch(this);
         return this;
     }
 

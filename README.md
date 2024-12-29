@@ -1,6 +1,44 @@
+Initialization:
+```java
+Profiler.settings()
+    .enable()
+    .launch();
+```
 
+Also:
+```java
+ProfilerSettings settings = ProfilerSettings.getDefault()
+        .threads(2)
+        .historyDepth(HistoryDepth.WEEK)
+        .enable()
+        .launch();
 
-ProfilerSettings
+Profiler.launch(settings);
+```
+
+Use `Tracker` interface to start and stop measuring process time:
+```java
+Tracker tracker = Tracker.start("general", "FastProcess", "run()");
+
+// your code here
+
+tracker.finish(); // sends data automatically
+```
+
+Or create a flexible wrapper for your business logic:
+```java
+public class CustomTracker {
+    public static Tracker start(String group, String process){
+        return Tracker.start("Custom", group, process);
+    }
+}
+
+Tracker tracker = CustomTracker.start("YourProcess", "doSomething()");
+...
+tracker.finish();
+```
+
+Available fields within ProfilerSettings (JSON for simplicity):
 ```json
 {
   "enabled": true,
@@ -8,12 +46,8 @@ ProfilerSettings
   "interval": 1000,
   "homePath": "/your/home/path",
   "fileName": "profiler.jsonl",
-  "metrics": [
-    "avg",
-    "p50",
-    "p75",
-    "p95"
-  ],
+  "emptyWrite": true,
+  "metrics": ["avg", "p50", "p75", "p95"],
   "logging": {
     "root": ["HITS", "STAT", "DATA"],
     "clusters": ["HITS", "STAT", "DATA"],
@@ -29,36 +63,21 @@ ProfilerSettings
 }
 ```
 
-Initialization
-```java
-Profiler.settings()
-    .historyDepth(HistoryDepth.WEEK)
-    .enable()
-    .launch();
-```
 
-Or
-```java
-ProfilerSettings settings = Profiler.settings()
-                    .historyDepth(HistoryDepth.WEEK)
-                    .enable();
 
-Profiler.launch(settings);
-```
-
-Shutdown
+Shutdown:
 ```java
 Profiler.shutdown();
 ```
 
-Loading report from data accumulated in the `profiler.jsonl` file
+Loading report from data accumulated in the `profiler.jsonl` file:
 ```java
 LocalDateTime start = LocalDateTime.parse("2024-12-29T09:34:14", DATE_TIME_FORMATTER);
 LocalDateTime finish = LocalDateTime.parse("2024-12-29T12:25:02", DATE_TIME_FORMATTER);
 List<DataRoot> dataList = Profiler.report(start, finish);
 ```
 
-Analyzing intersections between clusters, groups, processes
+Analyzing intersections between clusters, groups, processes:
 ```java
 DataRoot dataRoot = dataList.get(0);
 DataCluster dataCluster1 = dataRoot.getData().get("general");
