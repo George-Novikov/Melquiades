@@ -47,30 +47,38 @@ public class BufferReader implements AutoCloseable {
         channel.position(position);
         if (!channel.isOpen()) return null;
 
+        buffer.clear();
+        int bytesRead = channel.read(buffer);
+        if (bytesRead == -1) return null;
+        buffer.flip();
+
+        StringBuilder line = new StringBuilder();
+
         while (true) {
-            for (int i = 0; i < buffer.position(); i++) {
+            int lineStart = buffer.position();
+            boolean isNewlineFound = false;
+
+            for (int i = buffer.position(); i < buffer.limit(); i++) {
                 if (bytes[i] == '\n') {
-                    return constructString(bytes, i);
+                    isNewlineFound = true;
+                    line.append(new String(bytes, lineStart, i - lineStart, charset));
+                    channel.position(position + i + 1);
+                    return line.toString();
                 }
             }
-            if (buffer.position() == buffer.limit()) throw new IOException("Line is too long");
 
-            if (channel.read(buffer) == -1) {
-                if (buffer.position() == 0) return null;
-                return new String(bytes, 0, buffer.position(), charset);
+            if (!isNewlineFound) {
+                line.append(new String(bytes, lineStart, buffer.limit() - lineStart, charset));
+
+                buffer.clear();
+                bytesRead = channel.read(buffer);
+
+                if (bytesRead == -1) {
+                    return line.length() > 0 ? line.toString() : null;
+                }
+                buffer.flip();
             }
         }
-    }
-
-    public String constructString(byte[] bytes, int i) {
-        // Check if there's anything to copy first
-        if (buffer.position() > i + 1) {
-            System.arraycopy(bytes, i + 1, bytes, 0, buffer.position() - i - 1);
-            buffer.position(buffer.position() - i - 1);
-        } else {
-            buffer.position(0); // Reset position if no data to copy
-        }
-        return new String(bytes, 0, i, charset);
     }
 
     public List<String> linesBetween(long start, long end) throws IOException {
@@ -180,7 +188,7 @@ public class BufferReader implements AutoCloseable {
         channel.position(position);
         if (!channel.isOpen()) return -1;
 
-        long lastLineEndPosition = -1;  // Add this to track the end of the last matching line
+        long lastLineEndPosition = -1;
         long currentPosition = position;
 
         while (true) {
@@ -207,135 +215,7 @@ public class BufferReader implements AutoCloseable {
             currentPosition += buffer.limit();
         }
 
-        return lastLineEndPosition;  // Return the position after the end of the last matching line
-    }
-
-
-    public String findFirst(long position, String condition) throws IOException {
-        if (condition == null || condition.isEmpty()) return readLine(position);
-
-        byte[] pattern = condition.getBytes(charset);
-        channel.position(position);
-        if (!channel.isOpen()) return null;
-
-        buffer.clear();
-        int bytesRead = channel.read(buffer);
-        if (bytesRead == -1) return null;
-        buffer.flip();
-
-        while (true) {
-            int lineStart = buffer.position();
-            boolean foundLine = false;
-
-            // Look for newline in current buffer
-            for (int i = buffer.position(); i < buffer.limit(); i++) {
-                if (bytes[i] == '\n') {
-                    foundLine = true;
-                    // Check if current line matches pattern
-                    if (matchPattern(bytes, lineStart, i, pattern)) {
-                        String result = new String(bytes, lineStart, i - lineStart, charset);
-                        channel.position(position + i + 1);
-                        return result;
-                    }
-                    lineStart = i + 1;
-                    buffer.position(lineStart);
-                }
-            }
-
-            // If we haven't found any newlines and buffer is full, we need more data
-            if (!foundLine) {
-                if (buffer.hasRemaining()) {
-                    buffer.compact();
-                    bytesRead = channel.read(buffer);
-                    buffer.flip();
-                    if (bytesRead == -1) {
-                        // Check final line if any
-                        if (buffer.hasRemaining() &&
-                                matchPattern(bytes, buffer.position(), buffer.limit(), pattern)) {
-                            return new String(bytes, buffer.position(), buffer.limit() - buffer.position(), charset);
-                        }
-                        return null;
-                    }
-                } else {
-                    // Buffer is full but no newline found
-                    buffer.clear();
-                    bytesRead = channel.read(buffer);
-                    if (bytesRead == -1) return null;
-                    buffer.flip();
-                }
-            }
-        }
-    }
-
-    public String findLast(long position, String condition) throws IOException {
-        if (condition == null || condition.isEmpty()) return readLine(position);
-
-        byte[] pattern = condition.getBytes(charset);
-        channel.position(position);
-        if (!channel.isOpen()) return null;
-
-        // Store the byte range and buffer content of the last match
-        byte[] matchBuffer = null;
-        long matchPosition = -1;
-
-        buffer.clear();
-        int bytesRead = channel.read(buffer);
-        if (bytesRead == -1) return null;
-        buffer.flip();
-
-        long currentPosition = position;
-
-        while (true) {
-            int lineStart = buffer.position();
-            boolean foundLine = false;
-
-            // Look for newline in current buffer
-            for (int i = buffer.position(); i < buffer.limit(); i++) {
-                if (bytes[i] == '\n') {
-                    foundLine = true;
-                    // Check if current line matches pattern
-                    if (matchPattern(bytes, lineStart, i, pattern)) {
-                        matchBuffer = new byte[i - lineStart];
-                        System.arraycopy(bytes, lineStart, matchBuffer, 0, i - lineStart);
-                        matchPosition = currentPosition + i + 1;
-                    }
-                    lineStart = i + 1;
-                    buffer.position(lineStart);
-                }
-            }
-
-            currentPosition += buffer.position();
-
-            if (!foundLine) {
-                if (buffer.hasRemaining()) {
-                    buffer.compact();
-                    bytesRead = channel.read(buffer);
-                    buffer.flip();
-                    if (bytesRead == -1) {
-                        // Check final line if any
-                        if (buffer.hasRemaining() &&
-                                matchPattern(bytes, buffer.position(), buffer.limit(), pattern)) {
-                            int len = buffer.limit() - buffer.position();
-                            matchBuffer = new byte[len];
-                            System.arraycopy(bytes, buffer.position(), matchBuffer, 0, len);
-                            matchPosition = currentPosition + buffer.limit();
-                        }
-                        break;
-                    }
-                } else {
-                    buffer.clear();
-                    bytesRead = channel.read(buffer);
-                    if (bytesRead == -1) break;
-                    buffer.flip();
-                }
-            }
-        }
-
-        if (matchBuffer != null) {
-            channel.position(matchPosition);
-            return new String(matchBuffer, charset);
-        }
-        return null;
+        return lastLineEndPosition;
     }
 
     private boolean matchPattern(byte[] data, int start, int end, byte[] pattern) {

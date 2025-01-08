@@ -1,8 +1,6 @@
 package com.georgen.melquiades;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.georgen.melquiades.core.Profiler;
-import com.georgen.melquiades.core.ReportBuilder;
 import com.georgen.melquiades.io.BufferReader;
 import com.georgen.melquiades.model.Intersection;
 import com.georgen.melquiades.model.data.DataCluster;
@@ -16,7 +14,6 @@ import com.georgen.melquiades.sample.process.MediumProcess;
 import com.georgen.melquiades.sample.process.SlowProcess;
 import com.georgen.melquiades.util.Serializer;
 
-import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -30,7 +27,7 @@ public class Application {
         try {
             ProfilerSettings settings = ProfilerSettings.getDefault()
                     .threads(2)
-                    .emptyWrite(false)
+                    .emptyWrite(true)
                     .historyDepth(HistoryDepth.WEEK)
                     .enable()
                     .launch();
@@ -68,10 +65,23 @@ public class Application {
 
             Profiler.shutdown();
 
-            LocalDateTime start = LocalDateTime.parse("2024-12-29T12:27:33", DATE_TIME_FORMATTER);
-            LocalDateTime finish = LocalDateTime.parse("2024-12-29T12:28:01", DATE_TIME_FORMATTER);
+            LocalDateTime start = LocalDateTime.parse("2024-12-30T22:43:31", DATE_TIME_FORMATTER);
+            LocalDateTime finish = LocalDateTime.parse("2024-12-30T22:43:37", DATE_TIME_FORMATTER);
 
-            List<DataRoot> dataList = Profiler.report(start, finish, 2);
+            DataRoot slice = Profiler.findSlice(start, false);
+            System.out.println("Slice: " + Serializer.serialize(slice));
+
+//            slice = Profiler.findSlice(start, false);
+//            System.out.println("Slice: " + Serializer.serialize(slice));
+
+            try (BufferReader reader = new BufferReader(Profiler.settings().getLogPath())){
+                long pos = reader.firstPosition("{\"start\":\"2025-01-08T22:33:51");
+                System.out.println("Pos: " + pos);
+                String line = reader.readLine(pos);
+                System.out.println("Line: " + line);
+            }
+
+            List<DataRoot> dataList = Profiler.findRange(start, finish, 2);
             System.out.println(dataList.size());
             if (dataList.isEmpty()) return;
 

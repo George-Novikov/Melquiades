@@ -1,3 +1,11 @@
+### Melquiades - Java Profiling Library
+* A profiling library for collecting and aggregating your process completion time.  
+* Measure process durations, calculate averages, percentiles, and other metrics.  
+* All profiler data is then accumulated into a separate compact log file, which is also ready for deserialization and analytics.
+* Requires Java 8 or higher.
+
+### Usage
+
 Initialization:
 ```java
 Profiler.settings()
@@ -5,7 +13,7 @@ Profiler.settings()
     .launch();
 ```
 
-Also:
+Also with separate settings object:
 ```java
 ProfilerSettings settings = ProfilerSettings.getDefault()
         .threads(2)
@@ -19,10 +27,8 @@ Profiler.launch(settings);
 Use `Tracker` interface to start and stop measuring process time:
 ```java
 Tracker tracker = Tracker.start("general", "FastProcess", "run()");
-
 // your code here
-
-tracker.finish(); // sends data automatically
+tracker.finish(); // sends data to Profiler automatically
 ```
 
 Or create a flexible wrapper for your business logic:

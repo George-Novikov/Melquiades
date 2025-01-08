@@ -49,7 +49,9 @@ public class History {
     private void initHistory(HistoryDepth depth) {
         try {
             if (depth == null || HistoryDepth.NONE.equals(depth)) return;
+
             Class<? extends HistoryReport> javaClass = depth.getJavaClass();
+
             this.historyPath = Paths.get(Profiler.settings().getHomePath(), HistoryReport.FILE_NAME);
             this.historyFile = this.historyPath.toFile();
 

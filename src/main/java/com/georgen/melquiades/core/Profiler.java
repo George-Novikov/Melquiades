@@ -255,12 +255,20 @@ public class Profiler implements Closeable {
         return settings().isEnabled();
     }
 
-    public static List<DataRoot> report(LocalDateTime start, LocalDateTime finish) throws IOException {
-        return ReportBuilder.getReport(start, finish);
+    public static List<DataRoot> findRange(LocalDateTime start, LocalDateTime finish) throws IOException {
+        return ReportBuilder.findRange(start, finish);
     }
 
-    public static List<DataRoot> report(LocalDateTime start, LocalDateTime finish, int clearance) throws IOException {
-        return ReportBuilder.getReport(start, finish, clearance);
+    public static List<DataRoot> findRange(LocalDateTime start, LocalDateTime finish, int clearance) throws IOException {
+        return ReportBuilder.findRange(start, finish, clearance);
+    }
+
+    public static DataRoot findSlice(LocalDateTime time, boolean isBackwards) throws IOException {
+        return ReportBuilder.findSlice(time, isBackwards);
+    }
+
+    public static DataRoot findSlice(LocalDateTime time, boolean isBackwards, int clearance) throws IOException {
+        return ReportBuilder.findSlice(time, isBackwards, clearance);
     }
 
     public static void shutdown(){
