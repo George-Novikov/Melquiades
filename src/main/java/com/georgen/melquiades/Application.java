@@ -1,6 +1,7 @@
 package com.georgen.melquiades;
 
 import com.georgen.melquiades.core.Profiler;
+import com.georgen.melquiades.core.trackers.CustomTracker;
 import com.georgen.melquiades.io.BufferReader;
 import com.georgen.melquiades.model.Intersection;
 import com.georgen.melquiades.model.data.DataCluster;
@@ -12,6 +13,7 @@ import com.georgen.melquiades.sample.WorkerChain;
 import com.georgen.melquiades.sample.process.FastProcess;
 import com.georgen.melquiades.sample.process.MediumProcess;
 import com.georgen.melquiades.sample.process.SlowProcess;
+import com.georgen.melquiades.sample.process.StackProcess;
 import com.georgen.melquiades.util.Serializer;
 
 import java.time.LocalDateTime;
@@ -37,10 +39,13 @@ public class Application {
             System.out.println("Profiler is working: " + Profiler.isEnabled());
             Tracker globalTracker = Tracker.start("global", "Application", "main");
 
+            Tracker custom = CustomTracker.start("CustomGroup", "customProcess()");
+
             WorkerChain chain = new WorkerChain(
                     new FastProcess(), new FastProcess(), new FastProcess(),
                     new FastProcess(), new FastProcess(), new FastProcess(),
-                    new FastProcess(), new MediumProcess(), new SlowProcess()
+                    new FastProcess(), new MediumProcess(), new SlowProcess(),
+                    new StackProcess()
             );
 
             chain.run();
@@ -48,7 +53,8 @@ public class Application {
             chain = new WorkerChain(
                     new FastProcess(), new FastProcess(), new FastProcess(),
                     new FastProcess(), new FastProcess(), new FastProcess(),
-                    new FastProcess(), new MediumProcess(), new SlowProcess()
+                    new FastProcess(), new MediumProcess(), new SlowProcess(),
+                    new StackProcess()
             );
 
             chain.run();
@@ -56,17 +62,19 @@ public class Application {
             chain = new WorkerChain(
                     new FastProcess(), new FastProcess(), new FastProcess(),
                     new FastProcess(), new FastProcess(), new FastProcess(),
-                    new FastProcess(), new MediumProcess(), new SlowProcess()
+                    new FastProcess(), new MediumProcess(), new SlowProcess(),
+                    new StackProcess()
             );
 
             chain.run();
 
             globalTracker.finish();
+            custom.finish();
 
             Profiler.shutdown();
 
-            LocalDateTime start = LocalDateTime.parse("2024-12-30T22:43:31", DATE_TIME_FORMATTER);
-            LocalDateTime finish = LocalDateTime.parse("2024-12-30T22:43:37", DATE_TIME_FORMATTER);
+            LocalDateTime start = LocalDateTime.parse("2025-01-09T09:48:27", DATE_TIME_FORMATTER);
+            LocalDateTime finish = LocalDateTime.parse("2025-01-09T09:48:46", DATE_TIME_FORMATTER);
 
             DataRoot slice = Profiler.findSlice(start, false);
             System.out.println("Slice: " + Serializer.serialize(slice));
@@ -75,10 +83,12 @@ public class Application {
 //            System.out.println("Slice: " + Serializer.serialize(slice));
 
             try (BufferReader reader = new BufferReader(Profiler.settings().getLogPath())){
-                long pos = reader.firstPosition("{\"start\":\"2025-01-08T22:33:51");
+                long pos = reader.firstPosition("{\"start\":\"2025-01-09T09:48:39");
                 System.out.println("Pos: " + pos);
-                String line = reader.readLine(pos);
-                System.out.println("Line: " + line);
+                if (pos != -1) {
+                    String line = reader.readLine(pos);
+                    System.out.println("Line: " + line);
+                }
             }
 
             List<DataRoot> dataList = Profiler.findRange(start, finish, 2);
@@ -107,7 +117,6 @@ public class Application {
             System.out.println(
                     Serializer.serialize(intersections3)
             );
-
 
 //            ConcurrentMap<String, DataCluster> clusters = dataRoot.getData();
 //            clusters.forEach((k, v) -> {

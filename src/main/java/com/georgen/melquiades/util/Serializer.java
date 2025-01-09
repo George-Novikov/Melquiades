@@ -10,31 +10,33 @@ import java.util.stream.IntStream;
 public class Serializer {
 
     /** Thread-safe wrapper (Bill Pugh Singleton). Do not refactor. */
-    private static class Holder {
+    private static class ThreadSafe {
         private static final int DEFAULT_POOL_SIZE = 10;
         private static final ConcurrentLinkedDeque<ObjectMapper> POOL = initPool();
     }
 
     public static String serialize(Object object) throws JsonProcessingException {
-        ObjectMapper mapper = Holder.POOL.pollFirst();
+        ObjectMapper mapper = ThreadSafe.POOL.pollFirst();
         if (mapper == null) mapper = newMapper();
         String json = mapper.writeValueAsString(object);
-        Holder.POOL.offerLast(mapper);
+        ThreadSafe.POOL.offerLast(mapper);
         return json;
     }
 
     public static <T> T deserialize(String json, Class<T> javaClass) throws JsonProcessingException {
-        ObjectMapper mapper = Holder.POOL.pollFirst();
+        ObjectMapper mapper = ThreadSafe.POOL.pollFirst();
         if (mapper == null) mapper = newMapper();
         T object = mapper.readValue(json, javaClass);
-        Holder.POOL.offerLast(mapper);
+        ThreadSafe.POOL.offerLast(mapper);
         return object;
     }
 
+    public static int size(){ return ThreadSafe.POOL.size(); }
+
     public static void shrink(){
-        Holder.POOL.clear();
-        IntStream.range(0, Holder.DEFAULT_POOL_SIZE).forEach(i -> {
-            Holder.POOL.offerLast(newMapper());
+        ThreadSafe.POOL.clear();
+        IntStream.range(0, ThreadSafe.DEFAULT_POOL_SIZE).forEach(i -> {
+            ThreadSafe.POOL.offerLast(newMapper());
         });
     }
 
@@ -48,7 +50,7 @@ public class Serializer {
     private static ConcurrentLinkedDeque<ObjectMapper> initPool(){
         ConcurrentLinkedDeque<ObjectMapper> deque = new ConcurrentLinkedDeque<>();
 
-        IntStream.range(0, Holder.DEFAULT_POOL_SIZE).forEach(i -> {
+        IntStream.range(0, ThreadSafe.DEFAULT_POOL_SIZE).forEach(i -> {
             deque.offerLast(newMapper());
         });
 

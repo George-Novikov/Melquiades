@@ -64,9 +64,9 @@ public class Intersection {
         return intersections;
     }
 
-    public static List<Intersection> of(DataCluster root, String metric){
+    public static List<Intersection> of(DataCluster cluster, String metric){
         List<Intersection> intersections = new ArrayList<>();
-        Map<String, DataGroup> groups = root.getData();
+        Map<String, DataGroup> groups = cluster.getData();
         groups.forEach((k1,v1)-> {
             groups.forEach((k2,v2) -> {
                 Intersection intersection = Intersection.of(k1, v1, k2, v2, metric, DataType.GROUP);
@@ -76,9 +76,9 @@ public class Intersection {
         return intersections;
     }
 
-    public static List<Intersection> of(DataGroup root, String metric){
+    public static List<Intersection> of(DataGroup group, String metric){
         List<Intersection> intersections = new ArrayList<>();
-        Map<String, DataProcess> processes = root.getData();
+        Map<String, DataProcess> processes = group.getData();
         processes.forEach((k1,v1)-> {
             processes.forEach((k2,v2) -> {
                 Intersection intersection = Intersection.of(k1, v1, k2, v2, metric, DataType.GROUP);

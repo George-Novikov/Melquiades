@@ -24,14 +24,29 @@ ProfilerSettings settings = ProfilerSettings.getDefault()
 Profiler.launch(settings);
 ```
 
-Use `Tracker` interface to start and stop measuring process time:
+Use `Tracker` class to start and stop measuring process time:
 ```java
 Tracker tracker = Tracker.start("general", "FastProcess", "run()");
 // your code here
 tracker.finish(); // sends data to Profiler automatically
 ```
 
-Or create a flexible wrapper for your business logic:
+Extend Tracker or override its methods to implement your business logic.
+In this case if you need to send it to Profiler on start, tracker.register(); method call is mandatory.
+```java
+public class CustomTracker extends Tracker {
+    public CustomTracker(String group, String process) {
+        super("CUSTOM_CLUSTER", group, process);
+    }
+    public static Tracker start(String group, String process){
+        Tracker tracker = new CustomTracker(group, process);
+        tracker.register();
+        return tracker;
+    }
+}
+```
+
+Or just create a flexible wrapper :
 ```java
 public class CustomTracker {
     public static Tracker start(String group, String process){
