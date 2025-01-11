@@ -7,30 +7,31 @@ import com.georgen.melquiades.util.Serializer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Hits {
-    private int total;
-    private int running;
-    private int success;
-    private int errors;
+    private final AtomicInteger total = new AtomicInteger(0);
+    private final AtomicInteger running = new AtomicInteger(0);
+    private final AtomicInteger success = new AtomicInteger(0);
+    private final AtomicInteger errors = new AtomicInteger(0);
     @JsonIgnore
     private List<UUID> runs = new ArrayList<>();
 
-    public int getTotal() { return total; }
+    public int getTotal() { return total.get(); }
 
-    public void setTotal(int total) { this.total = total; }
+    public void setTotal(int total) { this.total.set(total); }
 
-    public int getRunning() { return running; }
+    public int getRunning() { return running.get(); }
 
-    public void setRunning(int running) { this.running = running; }
+    public void setRunning(int running) { this.running.set(running); }
 
-    public int getSuccess() { return success; }
+    public int getSuccess() { return success.get(); }
 
-    public void setSuccess(int success) { this.success = success; }
+    public void setSuccess(int success) { this.success.set(success); }
 
-    public int getErrors() { return errors; }
+    public int getErrors() { return errors.get(); }
 
-    public void setErrors(int errors) { this.errors = errors; }
+    public void setErrors(int errors) { this.errors.set(errors); }
 
     public List<UUID> getRuns() { return runs; }
 
@@ -52,22 +53,22 @@ public class Hits {
 
     public void plusRun(UUID uuid) {
         this.runs.add(uuid);
-        this.running++;
+        this.running.incrementAndGet();
     }
 
     public void minusRun(UUID uuid) {
         this.runs.remove(uuid);
-        this.running--;
+        this.running.decrementAndGet();
     }
 
     public void plusSuccess(UUID uuid){
         if (hasRun(uuid)) minusRun(uuid);
-        this.success++;
+        this.success.incrementAndGet();
     }
 
     public void plusError(UUID uuid){
         if (hasRun(uuid)) minusRun(uuid);
-        this.errors++;
+        this.errors.incrementAndGet();
     }
 
     public void register(Tracker tracker){
@@ -89,15 +90,15 @@ public class Hits {
     }
 
     public void calculate(){
-        this.total = this.running + this.success + this.errors;
+        this.total.set(this.running.get() + this.success.get() + this.errors.get());
     }
 
     public void averageWith(Hits outerHits){
         if (outerHits == null) return;
-        this.total = (this.total + outerHits.getTotal()) / 2;
-        this.running = (this.running + outerHits.getRunning()) / 2;
-        this.success = (this.success + outerHits.getSuccess()) / 2;
-        this.errors = (this.errors + outerHits.getErrors()) / 2;
+        this.total.set((this.total.get() + outerHits.getTotal()) / 2);
+        this.running.set((this.running.get() + outerHits.getRunning()) / 2);
+        this.success.set((this.success.get() + outerHits.getSuccess()) / 2);
+        this.errors.set((this.errors.get() + outerHits.getErrors()) / 2);
     }
 
     @Override

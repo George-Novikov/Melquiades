@@ -10,6 +10,7 @@ import com.georgen.melquiades.model.Hits;
 import com.georgen.melquiades.model.Stat;
 import com.georgen.melquiades.model.settings.DataType;
 import com.georgen.melquiades.core.trackers.Tracker;
+import com.sun.prism.null3d.NULL3DPipeline;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -52,6 +53,9 @@ public class DataRoot extends Data {
     public void setData(ConcurrentMap<String, DataCluster> data) { this.data = data; }
 
     @JsonIgnore
+    public boolean isFinished() { return this.finish != null; }
+
+    @JsonIgnore
     @Override
     public boolean isEmpty(){ return this.data == null || this.data.isEmpty(); }
 
@@ -78,8 +82,6 @@ public class DataRoot extends Data {
     public void calculate() {
         this.finish = LocalDateTime.now();
         this.duration = ChronoUnit.MILLIS.between(this.start, this.finish);
-
-        if (isEmpty()) return;
 
         this.data.values().forEach(DataCluster::calculate);
 

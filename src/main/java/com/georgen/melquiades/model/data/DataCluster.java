@@ -50,8 +50,6 @@ public class DataCluster extends Data {
 
     @Override
     public void calculate() {
-        if (isEmpty()) return;
-
         this.data.values().forEach(DataGroup::calculate);
 
         if (Profiler.logging().isClusterPolicy(HITS)){

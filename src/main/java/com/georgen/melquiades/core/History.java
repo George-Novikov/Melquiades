@@ -1,5 +1,6 @@
 package com.georgen.melquiades.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.georgen.melquiades.io.CloseableReader;
 import com.georgen.melquiades.io.CloseableWriter;
 import com.georgen.melquiades.model.data.DataRoot;
@@ -63,6 +64,8 @@ public class History {
                 String json = reader.read();
                 if (json == null || json.isEmpty()) json = "{}";
                 this.report = Serializer.deserialize(json, javaClass);
+            } catch (JsonProcessingException e){
+                this.report = javaClass.getDeclaredConstructor().newInstance();
             }
         } catch (Exception e){
             ErrorHandler errorHandler = Profiler.getInstance().getErrorHandler();

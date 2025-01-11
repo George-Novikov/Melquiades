@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.georgen.melquiades.core.Profiler;
 import com.georgen.melquiades.model.Hits;
+import com.georgen.melquiades.model.Phase;
 import com.georgen.melquiades.model.Stat;
 import com.georgen.melquiades.core.trackers.Tracker;
 
@@ -17,11 +18,11 @@ import static com.georgen.melquiades.model.settings.LoggingPolicy.*;
 @JsonPropertyOrder({"hits", "stat", "data"})
 public class DataProcess extends Data {
 
-    private Queue<Double> data;
+    private ConcurrentLinkedQueue<Double> data;
 
     public Queue<Double> getData() { return data; }
 
-    public void setData(Queue<Double> data) { this.data = data; }
+    public void setData(ConcurrentLinkedQueue<Double> data) { this.data = data; }
 
     @JsonIgnore
     @Override
@@ -36,6 +37,8 @@ public class DataProcess extends Data {
             this.getHits().register(tracker);
         }
 
+        if (Phase.RUNNING.equals(tracker.getPhase())) return;
+
         if (Profiler.logging().isProcessPolicy(DATA)){
             double duration = tracker.getDuration() / 1000.0;
             data.add(duration > 0 ? duration : 0.0);
@@ -44,8 +47,6 @@ public class DataProcess extends Data {
 
     @Override
     public void calculate() {
-        if (isEmpty()) return;
-
         if (Profiler.logging().isProcessPolicy(HITS)){
             this.getHits().calculate();
         }

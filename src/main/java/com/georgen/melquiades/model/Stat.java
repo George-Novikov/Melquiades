@@ -7,6 +7,7 @@ import com.georgen.melquiades.util.Statistics;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -38,58 +39,35 @@ public class Stat extends ConcurrentHashMap<String, Double> {
     }
 
     public static Stat of(Collection<Double> dataset){
-        Metrics metrics = Profiler.metrics();
-
         Stat stat = new Stat();
-        metrics.forEach(metric -> {
-            if (Metrics.isAvg(metric)) stat.put(Metrics.AVG, Statistics.avg(dataset));
-            if (Metrics.isMode(metric)) stat.put(Metrics.MODE, Statistics.mode(dataset));
-            if (Metrics.isMax(metric)) stat.put(Metrics.MAX, Statistics.max(dataset));
-            if (Metrics.isMin(metric)) stat.put(Metrics.MIN, Statistics.min(dataset));
+        if (dataset == null || dataset.isEmpty()) return stat;
 
-            if (Metrics.isPercentile(metric)){
-                int percentile = Integer.parseInt(metric.substring(1));
-                stat.put(metric, Statistics.percentile(percentile, dataset));
-            }
+        Profiler.metrics().forEach(metric -> {
+            double metricValue = Statistics.calculate(dataset, metric);
+            if (metricValue >= 0) stat.put(metric, metricValue);
         });
 
         return stat;
     }
 
     public static Stat ofBatch(List<Stat> batch){
-        Metrics metrics = Profiler.metrics();
-
         Stat stat = new Stat();
+        if (batch == null || batch.isEmpty()) return stat;
 
-        metrics.forEach(metric -> {
-            if (Metrics.isAvg(metric)){
-                List<Double> avgList = batch.stream().map(s -> s.get(Metrics.AVG)).collect(Collectors.toList());
-                stat.put(Metrics.AVG, Statistics.avg(avgList));
-            }
-
-            if (Metrics.isMode(metric)){
-                List<Double> modeList = batch.stream().map(s -> s.get(Metrics.MODE)).collect(Collectors.toList());
-                stat.put(Metrics.MODE, Statistics.mode(modeList));
-            }
-
-            if (Metrics.isMax(metric)){
-                List<Double> maxList = batch.stream().map(s -> s.get(Metrics.MAX)).collect(Collectors.toList());
-                stat.put(Metrics.MAX, Statistics.max(maxList));
-            }
-
-            if (Metrics.isMin(metric)){
-                List<Double> minList = batch.stream().map(s -> s.get(Metrics.MIN)).collect(Collectors.toList());
-                stat.put(Metrics.MIN, Statistics.min(minList));
-            }
-
-            if (Metrics.isPercentile(metric)){
-                int percentile = Integer.parseInt(metric.substring(1));
-                List<Double> percList = batch.stream().map(s -> s.get(metric)).collect(Collectors.toList());
-                stat.put(metric, Statistics.percentile(percentile, percList));
-            }
+        Profiler.metrics().forEach(metric -> {
+            List<Double> doubles = toDoubles(batch, metric);
+            double metricValue = Statistics.calculate(doubles, metric);
+            if (metricValue >= 0) stat.put(metric, metricValue);
         });
 
         return stat;
     }
 
+    private static List<Double> toDoubles(List<Stat> batch, String metric){
+        return batch.stream()
+                .filter(Objects::nonNull)
+                .map(s -> s.get(metric))
+                .filter(v -> v != null && v >= 0)
+                .collect(Collectors.toList());
+    }
 }

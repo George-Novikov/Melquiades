@@ -32,6 +32,7 @@ public class Profiler implements Closeable {
     private SuccessHandler successHandler;
     private History history;
     private DataRoot data;
+    private DataRoot rotatedData;
     private boolean isWorking;
     private LocalDate today;
 
@@ -153,21 +154,23 @@ public class Profiler implements Closeable {
         try {
             performDayCheck();
 
-            this.data.calculate();
-            if (this.data.isEmpty() && !settings.isEmptyWrite()){
-                this.data = new DataRoot();
+            this.rotatedData = this.data;
+            this.data = new DataRoot();
+
+            this.rotatedData.calculate();
+
+            if (this.rotatedData.isEmpty() && !settings.isEmptyWrite()){
                 return;
             }
 
-            String jsonReport = Serializer.serialize(this.data);
+            String jsonReport = Serializer.serialize(this.rotatedData);
             try (BufferAppender appender = new BufferAppender(settings.getLogPath())) {
                 appender.append(jsonReport);
             }
 
             if (settings.isHistoric()){
-                this.history.update(this.data);
+                this.history.update(this.rotatedData);
             }
-            this.data = new DataRoot();
         } catch (Exception e){
             this.errorHandler.handle(e);
         }
@@ -179,7 +182,9 @@ public class Profiler implements Closeable {
 
     private void tryProcess(Tracker tracker){
         try {
-            if (this.data == null) this.data = new DataRoot();
+            if (this.data == null || this.data.isFinished()){
+                this.data = new DataRoot();
+            }
             this.data.register(tracker);
             if (successHandler != null) successHandler.handle(tracker);
         } catch (Exception e) {

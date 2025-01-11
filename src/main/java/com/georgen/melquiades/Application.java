@@ -73,8 +73,8 @@ public class Application {
 
             Profiler.shutdown();
 
-            LocalDateTime start = LocalDateTime.parse("2025-01-09T09:48:27", DATE_TIME_FORMATTER);
-            LocalDateTime finish = LocalDateTime.parse("2025-01-09T09:48:46", DATE_TIME_FORMATTER);
+            LocalDateTime start = LocalDateTime.parse("2025-01-09T22:00:50", DATE_TIME_FORMATTER);
+            LocalDateTime finish = LocalDateTime.parse("2025-01-09T22:18:49", DATE_TIME_FORMATTER);
 
             DataRoot slice = Profiler.findSlice(start, false);
             System.out.println("Slice: " + Serializer.serialize(slice));
@@ -83,7 +83,7 @@ public class Application {
 //            System.out.println("Slice: " + Serializer.serialize(slice));
 
             try (BufferReader reader = new BufferReader(Profiler.settings().getLogPath())){
-                long pos = reader.firstPosition("{\"start\":\"2025-01-09T09:48:39");
+                long pos = reader.firstPosition("{\"start\":\"2025-01-09T22:00:57");
                 System.out.println("Pos: " + pos);
                 if (pos != -1) {
                     String line = reader.readLine(pos);

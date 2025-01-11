@@ -50,8 +50,6 @@ public class DataGroup extends Data {
 
     @Override
     public void calculate() {
-        if (isEmpty()) return;
-
         this.data.values().forEach(DataProcess::calculate);
 
         if (Profiler.logging().isGroupPolicy(HITS)){

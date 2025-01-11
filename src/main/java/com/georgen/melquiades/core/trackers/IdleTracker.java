@@ -23,16 +23,16 @@ public class IdleTracker extends Tracker {
         super(cluster, group, process);
     }
 
-    /** Please note that there's no Profiler call — thus it won't be automatically processed */
+    /** Please note that there's no Profiler call or register() method — thus it won't be automatically processed */
     @Override
     public Tracker finish(Object... args){
-        this.setFinish(LocalDateTime.now());
+        this.setFinish(System.nanoTime());
         this.setPhase(Phase.FINISHED);
-        this.setDuration(ChronoUnit.MILLIS.between(this.getStart(), this.getFinish()));
+        this.setDuration((this.getFinish() - this.getStart()) / 1_000_000);
         return this;
     }
 
-    /** Please note that there's no Profiler call — thus it won't be automatically processed */
+    /** Please note that there's no Profiler call or register() method — thus it won't be automatically processed */
     @Override
     public Tracker error(Exception e) {
         this.setPhase(Phase.ERROR);

@@ -17,10 +17,10 @@ public abstract class Tracker {
     private static final int DEFAULT_STACK_DEPTH = 1;
 
     private final UUID uuid;
-    private final LocalDateTime start;
-    private LocalDateTime finish;
+    private final long start;
+    private long finish;
     private long duration = -1;
-    private Phase phase = Phase.RUNNING;
+    private Phase phase = Phase.NONE;
     private String cluster;
     private String group;
     private String process;
@@ -39,7 +39,8 @@ public abstract class Tracker {
 
     public Tracker(String cluster, String group, String process) {
         this.uuid = UUID.randomUUID();
-        this.start = LocalDateTime.now();
+        this.start = System.nanoTime();
+        this.phase = Phase.RUNNING;
         this.cluster = cluster;
         this.group = group;
         this.process = process;
@@ -47,11 +48,11 @@ public abstract class Tracker {
 
     public UUID getUuid() { return uuid; }
 
-    public LocalDateTime getStart() { return start; }
+    public long getStart() { return start; }
 
-    public LocalDateTime getFinish() { return finish; }
+    public long getFinish() { return finish; }
 
-    public void setFinish(LocalDateTime finish) { this.finish = finish; }
+    public void setFinish(long finish) { this.finish = finish; }
 
     public long getDuration() { return duration; }
 
@@ -81,10 +82,12 @@ public abstract class Tracker {
 
     public boolean hasProcess(){ return this.getProcess() != null && !this.getProcess().isEmpty(); }
 
+    public boolean isFinished(){ return hasPhase() && (Phase.FINISHED == getPhase() || Phase.ERROR == getPhase()); }
+
     public Tracker finish(Object... args){
-        this.setFinish(LocalDateTime.now());
+        this.setFinish(System.nanoTime());
         this.setPhase(Phase.FINISHED);
-        this.setDuration(ChronoUnit.MILLIS.between(this.getStart(), this.getFinish()));
+        this.setDuration((this.getFinish() - this.getStart()) / 1_000_000);
         Profiler.getInstance().process(this);
         return this;
     }
@@ -127,9 +130,7 @@ public abstract class Tracker {
     public static Tracker start() {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         StackTraceElement element = stackTrace[DEFAULT_STACK_DEPTH];
-        Tracker tracker = new NamedTracker(Tracker.DEFAULT_CLUSTER, element.getClassName(), element.getMethodName());
-        Profiler.getInstance().process(tracker);
-        return tracker;
+        return start(Tracker.DEFAULT_CLUSTER, element.getClassName(), element.getMethodName());
     }
 
     public static Tracker start(String process){
